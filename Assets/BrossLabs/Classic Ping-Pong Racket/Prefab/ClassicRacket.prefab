@@ -47,6 +47,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GrabThreshold: 0.4
   Handedness: 2
+  TrackTargetPosition: 13
+  TrackTargetOrientation: 2
+  RotationOffsetXAxis: 180
+  RotationOffsetYAxis: -45
+  RotationOffsetZAxis: -45
+  OffsetXAxis: -0.08
+  OffsetYAxis: 0.04
+  OffsetZAxis: 0.04
 --- !u!1 &5794525292500851779
 GameObject:
   m_ObjectHideFlags: 0
@@ -141,7 +149,7 @@ MeshCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 4
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -7921805707226750555, guid: 4d94d7373a0cf594fb78e8bf83c24173, type: 3}
 --- !u!1 &7231282586348530818

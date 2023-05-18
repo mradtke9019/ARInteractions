@@ -14,21 +14,34 @@ public class GrabbableHandTracking : MonoBehaviour
     [Tooltip("The hand to consider when grabbing or detecting if it is nearby.")]
     private Microsoft.MixedReality.Toolkit.Utilities.Handedness Handedness = Microsoft.MixedReality.Toolkit.Utilities.Handedness.Right;
     [SerializeField]
-    [Tooltip("The target position and orientation of the object.")]
-    private TrackedHandJoint TrackTarget = TrackedHandJoint.Palm;
+    [Tooltip("The target position of the object.")]
+    private TrackedHandJoint TrackTargetPosition = TrackedHandJoint.MiddleKnuckle;
+    [SerializeField]
+    [Tooltip("The target orientation of the object.")]
+    private TrackedHandJoint TrackTargetOrientation = TrackedHandJoint.Palm;
 
-    [Tooltip("The offset to contribute in degrees to the X Axis Orientation when updating the position of the object.")]
+    [Header("Transform Offsets")]
+    [Tooltip("The offset to contribute in degrees to the X Axis Orientation when updating the orientation of the object.")]
     [SerializeField]
     private float RotationOffsetXAxis = 180.0f;
-    [Tooltip("The offset to contribute in degrees to the Y Axis Orientation when updating the position of the object.")]
+    [Tooltip("The offset to contribute in degrees to the Y Axis Orientation when updating the orientation of the object.")]
     [SerializeField]
-    private float RotationOffsetYAxis = 0;
-    [Tooltip("The offset to contribute in degrees to the Z Axis Orientation when updating the position of the object.")]
+    private float RotationOffsetYAxis = -45.0f;
+    [Tooltip("The offset to contribute in degrees to the Z Axis Orientation when updating the orientation of the object.")]
     [SerializeField]
-    private float RotationOffsetZAxis = 0;
+    private float RotationOffsetZAxis = -45.0f;
+    [Tooltip("The offset to contribute to the X axis translation.")]
+    [SerializeField]
+    private float OffsetXAxis = 0.0f;
+    [Tooltip("The offset to contribute to the Y axis translation.")]
+    [SerializeField]
+    private float OffsetYAxis = 0.0f;
+    [Tooltip("The offset to contribute to the Z axis translation.")]
+    [SerializeField]
+    private float OffsetZAxis = 0.0f;
 
     [SerializeField]
-    private const float GrabDistanceThreshold = 0.1f;
+    private const float GrabDistanceThreshold = 0.3f;
 
     private IMixedRealityHandJointService handJointService;
     private IMixedRealityHandJointService HandJointService =>
@@ -36,19 +49,31 @@ public class GrabbableHandTracking : MonoBehaviour
         (handJointService = CoreServices.GetInputSystemDataProvider<IMixedRealityHandJointService>());
 
     /// <summary>
-    /// Updates the game object to the specified joint on the hand.
+    /// Updates the game object posotion to the specified joint on the hand.
     /// </summary>
     /// <param name="joint"></param>
-    public void UpdateToHandOrientation(Handedness hand = Handedness.Right, TrackedHandJoint joint = TrackedHandJoint.Wrist)
+    public void UpdateHandPosition(Handedness hand = Handedness.Right, TrackedHandJoint joint = TrackedHandJoint.Palm)
+    {
+        Transform jointTransform = HandJointService.RequestJointTransform(joint, hand);
+        jointTransform.Translate(new Vector3(OffsetXAxis, OffsetYAxis, OffsetZAxis));
+        //Vector3 offset =  new Vector3(OffsetXAxis, OffsetYAxis, OffsetZAxis);
+        this.transform.SetPositionAndRotation(jointTransform.position, this.transform.rotation);
+    }
+
+    /// <summary>
+    /// Updates the game object orientation to the specified joint on the hand.
+    /// </summary>
+    /// <param name="joint"></param>
+    public void UpdateHandOrientation(Handedness hand = Handedness.Right, TrackedHandJoint joint = TrackedHandJoint.Palm)
     {
         Transform jointTransform = HandJointService.RequestJointTransform(joint, hand);
 
         Quaternion orientation = jointTransform.rotation;
-        orientation *= Quaternion.Euler(0,RotationOffsetYAxis,0);
+        orientation *= Quaternion.Euler(0, RotationOffsetYAxis, 0);
         orientation *= Quaternion.Euler(0, 0, RotationOffsetZAxis);
         orientation *= Quaternion.Euler(RotationOffsetXAxis, 0, 0);
 
-        this.transform.SetPositionAndRotation(jointTransform.position, orientation);
+        this.transform.SetPositionAndRotation(this.transform.position, orientation);
     }
     void Start()
     {
@@ -88,9 +113,10 @@ public class GrabbableHandTracking : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(IsGrabbing(Handedness, GrabDistanceThreshold, GrabThreshold, TrackTarget))
+        if(IsGrabbing(Handedness, GrabDistanceThreshold, GrabThreshold, TrackTargetPosition))
         {
-            UpdateToHandOrientation(Handedness, TrackTarget);
+            UpdateHandPosition(Handedness, TrackTargetPosition);
+            UpdateHandOrientation(Handedness, TrackTargetOrientation);
         }
     }
 }
