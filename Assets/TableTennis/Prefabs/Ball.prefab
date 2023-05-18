@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 3446580235946607632}
   - component: {fileID: 2691850967749140368}
   - component: {fileID: 3370707933217905368}
-  - component: {fileID: 4398926824382979922}
+  - component: {fileID: 5884985077545993107}
   m_Layer: 0
   m_Name: Ball
   m_TagString: Ball
@@ -187,7 +187,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTetherWhenManipulating: 0
   IsBoundsHandles: 0
---- !u!114 &4398926824382979922
+--- !u!114 &5884985077545993107
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -196,8 +196,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 7846937499824352122}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1a7709b21ed4d1f49b0c2cc954e6d2db, type: 3}
+  m_Script: {fileID: 11500000, guid: b5c130b3241757b4e884987ca5b081fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Anchor: {x: 0, y: 0, z: 0}
-  Radius: 10

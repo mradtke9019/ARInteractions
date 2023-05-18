@@ -75,10 +75,6 @@ public class GrabbableHandTracking : MonoBehaviour
 
         this.transform.SetPositionAndRotation(this.transform.position, orientation);
     }
-    void Start()
-    {
-        
-    }
 
     /// <summary>
     /// Returns whether or not the given hand's joint is close to the object based on a distance. https://localjoost.github.io/Basic-hand-gesture-recognition-with-MRTK-on-HoloLens-2/
@@ -109,6 +105,85 @@ public class GrabbableHandTracking : MonoBehaviour
 
         return d < distance;
     }
+
+    public void SetRotationOffsetXAxis(float value)
+    {
+        RotationOffsetXAxis = value;
+    }
+    public void SetRotationOffsetYAxis(float value)
+    {
+        RotationOffsetYAxis = value;
+    }
+    public void SetRotationOffsetZAxis(float value)
+    {
+        RotationOffsetZAxis = value;
+    }
+    public void SetOffsetXAxis(float value)
+    {
+        OffsetXAxis = value;
+    }
+    public void SetOffsetYAxis(float value)
+    {
+        OffsetYAxis = value;
+    }
+    public void SetOffsetZAxis(float value)
+    {
+        OffsetZAxis = value;
+    }
+
+    #region Incremental Functions
+    public void IncrementRotationOffsetXAxis(float value)
+    {
+        RotationOffsetXAxis += value;
+    }
+    public void IncrementRotationOffsetYAxis(float value)
+    {
+        RotationOffsetYAxis += value;
+    }
+    public void IncrementRotationOffsetZAxis(float value)
+    {
+        RotationOffsetZAxis += value;
+    }
+    public void IncrementOffsetXAxis(float value)
+    {
+        OffsetXAxis += value;
+    }
+    public void IncrementOffsetYAxis(float value)
+    {
+        OffsetYAxis += value;
+    }
+    public void IncrementOffsetZAxis(float value)
+    {
+        OffsetZAxis += value;
+    }
+    #endregion
+
+    #region Decremental Regions
+    public void DecrementRotationOffsetXAxis(float value)
+    {
+        RotationOffsetXAxis -= value;
+    }
+    public void DecrementRotationOffsetYAxis(float value)
+    {
+        RotationOffsetYAxis -= value;
+    }
+    public void DecrementRotationOffsetZAxis(float value)
+    {
+        RotationOffsetZAxis -= value;
+    }
+    public void DecrementOffsetXAxis(float value)
+    {
+        OffsetXAxis -= value;
+    }
+    public void DecrementOffsetYAxis(float value)
+    {
+        OffsetYAxis -= value;
+    }
+    public void DecrementOffsetZAxis(float value)
+    {
+        OffsetZAxis -= value;
+    }
+    #endregion
 
     // Update is called once per frame
     void Update()
