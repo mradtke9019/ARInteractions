@@ -1,15 +1,21 @@
 using Microsoft.MixedReality.Toolkit;
 using Microsoft.MixedReality.Toolkit.Input;
 using Microsoft.MixedReality.Toolkit.Utilities;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.XR;
 
 public class GrabbableHandTracking : MonoBehaviour
 {
     // Start is called before the first frame update
-
     [SerializeField]
-    private float GrabThreshold = 0.4f;
+    [Tooltip("The gesture needed to interact with this object.")]
+    private Gesture GestureRequired = Gesture.Grab;
+    [SerializeField]
+    [Tooltip("The threshold for considering if something is gripped.")]
+    private float GrabGripThreshold = 0.3f;
+    [SerializeField]
+    [Tooltip("The threshold distance for interactions to be considered.")]
+    private float GrabDistanceThreshold = 0.2f;
     [SerializeField]
     [Tooltip("The hand to consider when grabbing or detecting if it is nearby.")]
     private Microsoft.MixedReality.Toolkit.Utilities.Handedness Handedness = Microsoft.MixedReality.Toolkit.Utilities.Handedness.Right;
@@ -40,13 +46,22 @@ public class GrabbableHandTracking : MonoBehaviour
     [SerializeField]
     private float OffsetZAxis = 0.0f;
 
-    [SerializeField]
-    private const float GrabDistanceThreshold = 0.3f;
 
     private IMixedRealityHandJointService handJointService;
     private IMixedRealityHandJointService HandJointService =>
         handJointService ??
         (handJointService = CoreServices.GetInputSystemDataProvider<IMixedRealityHandJointService>());
+
+    private void Start()
+    {
+        Vector3 offsetAbsolute = new Vector3(Mathf.Abs(OffsetXAxis), Mathf.Abs(OffsetYAxis), Mathf.Abs(OffsetZAxis));
+        float distance = offsetAbsolute.magnitude;
+
+        if(distance > GrabDistanceThreshold)
+        {
+            Debug.LogError($"Offset on {this.gameObject.name} will always put it out of grab distance. Adjust offset or grab distance.");
+        }
+    }
 
     /// <summary>
     /// Updates the game object posotion to the specified joint on the hand.
@@ -83,26 +98,25 @@ public class GrabbableHandTracking : MonoBehaviour
     /// <param name="distance"></param>
     /// <param name="joint"></param>
     /// <returns></returns>
-    public bool IsGrabbing(Handedness hand, float distance, float grabThreshold, TrackedHandJoint joint = TrackedHandJoint.Palm)
+    public bool IsGrabbing(Handedness hand, Gesture gesture, float distance, float grabThreshold, TrackedHandJoint joint = TrackedHandJoint.Palm)
     {
-        if(!IsNearby(hand, distance, joint))
-        {
-            return false;
-        }
-        bool grabbing = 
-            HandPoseUtils.MiddleFingerCurl(hand) > grabThreshold &&
-            HandPoseUtils.RingFingerCurl(hand) > GrabThreshold &&
-            HandPoseUtils.PinkyFingerCurl(hand) > GrabThreshold &&
-            HandPoseUtils.ThumbFingerCurl(hand) > GrabThreshold;
-        return grabbing;
+        return IsNearby(hand, distance, joint) && GestureHandler.IsGesturing(hand, gesture, new List<object>() { grabThreshold });
     }
 
     public bool IsNearby(Handedness hand, float distance, TrackedHandJoint joint = TrackedHandJoint.Palm)
     {
+        if(!HandJointService.IsHandTracked(hand))
+        {
+            return false;
+        }
+
         Transform jointTransform = HandJointService.RequestJointTransform(TrackedHandJoint.Palm, hand);
 
         float d = Vector3.Distance(jointTransform.position, this.gameObject.transform.position);
-
+        if(d < distance)
+        {
+            Debug.Log("Hand near: " + d);
+        }
         return d < distance;
     }
 
@@ -185,10 +199,13 @@ public class GrabbableHandTracking : MonoBehaviour
     }
     #endregion
 
-    // Update is called once per frame
+
+    /// <summary>
+    /// Update the position and orientation of the object if the specified hand is near the object and performing the specified gesture.
+    /// </summary>
     void Update()
     {
-        if(IsGrabbing(Handedness, GrabDistanceThreshold, GrabThreshold, TrackTargetPosition))
+        if(IsGrabbing(Handedness, GestureRequired, GrabDistanceThreshold, GrabGripThreshold, TrackTargetPosition))
         {
             UpdateHandPosition(Handedness, TrackTargetPosition);
             UpdateHandOrientation(Handedness, TrackTargetOrientation);

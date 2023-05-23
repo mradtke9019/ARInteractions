@@ -1,109 +1,92 @@
 using Microsoft.MixedReality.Toolkit.Input;
+using Microsoft.MixedReality.Toolkit.Utilities;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
+using UnityEngine.XR;
 
-public class GestureHandler : MonoBehaviour, IMixedRealityGestureHandler<Vector3>
+public enum Gesture { Grab, Pinch };
+public static class GestureHandler
 {
+    private const float GRAB_THRESHOLD = 0.3f;
 
-    [Header("Mapped gesture input actions")]
-
-    [SerializeField]
-    private MixedRealityInputAction holdAction = MixedRealityInputAction.None;
-
-    [SerializeField]
-    private MixedRealityInputAction navigationAction = MixedRealityInputAction.None;
-
-    [SerializeField]
-    private MixedRealityInputAction manipulationAction = MixedRealityInputAction.None;
-
-    [SerializeField]
-    private MixedRealityInputAction tapAction = MixedRealityInputAction.None;
-
-    private void OnEnable()
+    /// <summary>
+    /// Returns whether or not the specified hand is grabbing based on a threshold.
+    /// </summary>
+    /// <param name="hand"></param>
+    /// <param name="threshold"></param>
+    /// <returns></returns>
+    public static bool IsGrabbing(Handedness hand, float? threshold = null)
     {
+        float t;
+        if(threshold == null)
+        {
+            t = GRAB_THRESHOLD;
+        }
+        else
+        {
+            t = threshold.Value;
+        }
+
+        bool grabbing = 
+            HandPoseUtils.IndexFingerCurl(hand) > t &&
+            HandPoseUtils.MiddleFingerCurl(hand) > t &&
+            HandPoseUtils.RingFingerCurl(hand) > t &&
+            HandPoseUtils.PinkyFingerCurl(hand) > t &&
+            HandPoseUtils.ThumbFingerCurl(hand) > t;
+        return grabbing;
     }
 
-    public void OnGestureStarted(InputEventData eventData)
+    /// <summary>
+    /// Returns whether or not the specified hand is pinching based on a threshold.
+    /// </summary>
+    /// <param name="hand"></param>
+    /// <param name="threshold"></param>
+    /// <returns></returns>
+    public static bool IsPinching(Handedness hand, float? threshold = null)
     {
-        Debug.Log($"OnGestureStarted [{Time.frameCount}]: {eventData.MixedRealityInputAction.Description}");
-
-        MixedRealityInputAction action = eventData.MixedRealityInputAction;
-        if (action == holdAction)
+        float t;
+        if (threshold == null)
         {
+            t = GRAB_THRESHOLD;
         }
-        else if (action == manipulationAction)
+        else
         {
-        }
-        else if (action == navigationAction)
-        {
+            t = threshold.Value;
         }
 
+        // All fingers will be grabbing except the index finger and thumb.
+        bool pinching =
+            HandPoseUtils.IndexFingerCurl(hand) > t &&
+            HandPoseUtils.ThumbFingerCurl(hand) > t &&
+            HandPoseUtils.MiddleFingerCurl(hand) < t &&
+            HandPoseUtils.RingFingerCurl(hand) < t &&
+            HandPoseUtils.PinkyFingerCurl(hand) < t ; 
+        return pinching;
     }
 
-    public void OnGestureUpdated(InputEventData eventData)
+    /// <summary>
+    /// Returns whether or not the given hand is performing the specified gesture.
+    /// </summary>
+    /// <param name="hand"></param>
+    /// <param name="gesture"></param>
+    /// <param name="parameters"></param>
+    /// <returns></returns>
+    public static bool IsGesturing(Handedness hand, Gesture gesture, List<object> parameters = null) 
     {
-        Debug.Log($"OnGestureUpdated [{Time.frameCount}]: {eventData.MixedRealityInputAction.Description}");
+        switch(gesture)
+        {
+            case Gesture.Grab:
+                Debug.Log("Grabbing");
+                return IsGrabbing(hand, parameters != null ? (float?)parameters.FirstOrDefault() : null);
+            case Gesture.Pinch:
+                Debug.Log("Pinching");
+                return false;
+        }
 
-        MixedRealityInputAction action = eventData.MixedRealityInputAction;
-        if (action == holdAction)
-        {
-        }
-    }
-
-    public void OnGestureUpdated(InputEventData<Vector3> eventData)
-    {
-        Debug.Log($"OnGestureUpdated [{Time.frameCount}]: {eventData.MixedRealityInputAction.Description}");
-
-        MixedRealityInputAction action = eventData.MixedRealityInputAction;
-        if (action == manipulationAction)
-        {
-        }
-        else if (action == navigationAction)
-        {
-        }
-    }
-
-    public void OnGestureCompleted(InputEventData eventData)
-    {
-        Debug.Log($"OnGestureCompleted [{Time.frameCount}]: {eventData.MixedRealityInputAction.Description}");
-
-        MixedRealityInputAction action = eventData.MixedRealityInputAction;
-        if (action == holdAction)
-        {
-        }
-        else if (action == tapAction)
-        {
-        }
-    }
-
-    public void OnGestureCompleted(InputEventData<Vector3> eventData)
-    {
-        Debug.Log($"OnGestureCompleted [{Time.frameCount}]: {eventData.MixedRealityInputAction.Description}");
-
-        MixedRealityInputAction action = eventData.MixedRealityInputAction;
-        if (action == manipulationAction)
-        {
-        }
-        else if (action == navigationAction)
-        {
-        }
-    }
-
-    public void OnGestureCanceled(InputEventData eventData)
-    {
-        Debug.Log($"OnGestureCanceled [{Time.frameCount}]: {eventData.MixedRealityInputAction.Description}");
-
-        MixedRealityInputAction action = eventData.MixedRealityInputAction;
-        if (action == holdAction)
-        {
-        }
-        else if (action == manipulationAction)
-        {
-        }
-        else if (action == navigationAction)
-        {
-        }
+        return false;
     }
 }

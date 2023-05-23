@@ -45,16 +45,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bb1236f991fc8d41a10a2286799fe50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GrabThreshold: 0.4
+  GestureRequired: 0
+  GrabGripThreshold: 0.3
+  GrabDistanceThreshold: 0.2
   Handedness: 2
   TrackTargetPosition: 13
   TrackTargetOrientation: 2
-  RotationOffsetXAxis: 180
+  RotationOffsetXAxis: 183
   RotationOffsetYAxis: -45
   RotationOffsetZAxis: -45
   OffsetXAxis: -0.08
-  OffsetYAxis: 0.04
-  OffsetZAxis: 0.04
+  OffsetYAxis: 0.03
+  OffsetZAxis: 0.0065
 --- !u!1 &5794525292500851779
 GameObject:
   m_ObjectHideFlags: 0
