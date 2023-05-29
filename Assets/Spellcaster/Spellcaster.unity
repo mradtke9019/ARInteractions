@@ -415,50 +415,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15b5321bc744c1244997bc363577cb5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GestureCallbacks:
-  - Gesture: 0
-    GestureOnStart:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 2017026850}
-          m_TargetAssemblyTypeName: UnityEngine.AudioSource, UnityEngine
-          m_MethodName: Play
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 1551728125}
-          m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-          m_MethodName: SetActive
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 1
-          m_CallState: 2
-        - m_Target: {fileID: 1551728126}
-          m_TargetAssemblyTypeName: HandTracking, Assembly-CSharp
-          m_MethodName: SetTracking
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 1
-          m_CallState: 2
-    GestureOnEnd:
-      m_PersistentCalls:
-        m_Calls: []
+  GestureHandler:
+    Gestures:
+    - {fileID: 11400000, guid: ec83777f08e13b741a19e69a5778b831, type: 2}
 --- !u!4 &1136596417
 Transform:
   m_ObjectHideFlags: 0
@@ -486,7 +445,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1975959190090480, guid: eca000ab44c908d4dab395f654753038, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4335282639064450, guid: eca000ab44c908d4dab395f654753038, type: 3}
       propertyPath: m_RootOrder

@@ -76,7 +76,7 @@ public static class GestureUtil
     /// <param name="gesture"></param>
     /// <param name="parameters"></param>
     /// <returns></returns>
-    public static bool IsGesturing(Handedness hand, Gesture gesture, List<object> parameters = null) 
+    public static bool IsGesturing(Handedness hand, GestureType gesture, List<object> parameters = null) 
     {
 /*        switch(gesture)
         {

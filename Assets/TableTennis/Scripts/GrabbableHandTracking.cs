@@ -10,7 +10,7 @@ public class GrabbableHandTracking : MonoBehaviour
     // Start is called before the first frame update
     [SerializeField]
     [Tooltip("The gesture needed to interact with this object.")]
-    private Gesture GestureRequired = Gesture.None;
+    private GestureType GestureRequired = GestureType.None;
     [SerializeField]
     [Tooltip("The threshold for considering if something is gripped.")]
     private float GrabGripThreshold = 0.3f;
@@ -111,7 +111,7 @@ public class GrabbableHandTracking : MonoBehaviour
     /// <param name="distance"></param>
     /// <param name="joint"></param>
     /// <returns></returns>
-    public bool IsGrabbing(Handedness hand, Gesture gesture, float distance, float grabThreshold, TrackedHandJoint joint = TrackedHandJoint.Palm)
+    public bool IsGrabbing(Handedness hand, GestureType gesture, float distance, float grabThreshold, TrackedHandJoint joint = TrackedHandJoint.Palm)
     {
         return IsNearby(hand, distance, joint) && GestureUtil.IsGesturing(hand, gesture, new List<object>() { grabThreshold });
     }
