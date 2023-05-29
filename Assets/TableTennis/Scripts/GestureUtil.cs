@@ -8,10 +8,11 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.XR;
 
-public enum Gesture { Grab, Pinch };
-public static class GestureHandler
+//public enum Gesture { Grab, Pinch };
+public static class GestureUtil
 {
     private const float GRAB_THRESHOLD = 0.3f;
+    private const bool DEBUG = false;
 
     /// <summary>
     /// Returns whether or not the specified hand is grabbing based on a threshold.
@@ -77,16 +78,22 @@ public static class GestureHandler
     /// <returns></returns>
     public static bool IsGesturing(Handedness hand, Gesture gesture, List<object> parameters = null) 
     {
-        switch(gesture)
+/*        switch(gesture)
         {
             case Gesture.Grab:
-                Debug.Log("Grabbing");
+                if(DEBUG)
+                {
+                    Debug.Log("Grabbing");
+                }
                 return IsGrabbing(hand, parameters != null ? (float?)parameters.FirstOrDefault() : null);
             case Gesture.Pinch:
-                Debug.Log("Pinching");
+                if (DEBUG)
+                {
+                    Debug.Log("Pinching");
+                }
                 return false;
         }
-
+*/
         return false;
     }
 }

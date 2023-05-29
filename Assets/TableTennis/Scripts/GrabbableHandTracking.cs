@@ -2,6 +2,7 @@ using Microsoft.MixedReality.Toolkit;
 using Microsoft.MixedReality.Toolkit.Input;
 using Microsoft.MixedReality.Toolkit.Utilities;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GrabbableHandTracking : MonoBehaviour
@@ -9,7 +10,7 @@ public class GrabbableHandTracking : MonoBehaviour
     // Start is called before the first frame update
     [SerializeField]
     [Tooltip("The gesture needed to interact with this object.")]
-    private Gesture GestureRequired = Gesture.Grab;
+    private Gesture GestureRequired = Gesture.None;
     [SerializeField]
     [Tooltip("The threshold for considering if something is gripped.")]
     private float GrabGripThreshold = 0.3f;
@@ -52,6 +53,8 @@ public class GrabbableHandTracking : MonoBehaviour
         handJointService ??
         (handJointService = CoreServices.GetInputSystemDataProvider<IMixedRealityHandJointService>());
 
+
+    private Rigidbody _rigidbody;
     private void Start()
     {
         Vector3 offsetAbsolute = new Vector3(Mathf.Abs(OffsetXAxis), Mathf.Abs(OffsetYAxis), Mathf.Abs(OffsetZAxis));
@@ -61,6 +64,15 @@ public class GrabbableHandTracking : MonoBehaviour
         {
             Debug.LogError($"Offset on {this.gameObject.name} will always put it out of grab distance. Adjust offset or grab distance.");
         }
+
+        _rigidbody = this.GetComponent<Rigidbody>();
+        if (_rigidbody == null)
+        {
+            _rigidbody = this.AddComponent<Rigidbody>();
+        }
+        _rigidbody.isKinematic = true;
+        _rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+        _rigidbody.useGravity = false;
     }
 
     /// <summary>
@@ -72,7 +84,8 @@ public class GrabbableHandTracking : MonoBehaviour
         Transform jointTransform = HandJointService.RequestJointTransform(joint, hand);
         jointTransform.Translate(new Vector3(OffsetXAxis, OffsetYAxis, OffsetZAxis));
         //Vector3 offset =  new Vector3(OffsetXAxis, OffsetYAxis, OffsetZAxis);
-        this.transform.SetPositionAndRotation(jointTransform.position, this.transform.rotation);
+        //this.transform.SetPositionAndRotation(jointTransform.position, this.transform.rotation);
+        _rigidbody.MovePosition(jointTransform.position);
     }
 
     /// <summary>
@@ -88,7 +101,7 @@ public class GrabbableHandTracking : MonoBehaviour
         orientation *= Quaternion.Euler(0, 0, RotationOffsetZAxis);
         orientation *= Quaternion.Euler(RotationOffsetXAxis, 0, 0);
 
-        this.transform.SetPositionAndRotation(this.transform.position, orientation);
+        _rigidbody.MoveRotation(orientation);
     }
 
     /// <summary>
@@ -100,7 +113,7 @@ public class GrabbableHandTracking : MonoBehaviour
     /// <returns></returns>
     public bool IsGrabbing(Handedness hand, Gesture gesture, float distance, float grabThreshold, TrackedHandJoint joint = TrackedHandJoint.Palm)
     {
-        return IsNearby(hand, distance, joint) && GestureHandler.IsGesturing(hand, gesture, new List<object>() { grabThreshold });
+        return IsNearby(hand, distance, joint) && GestureUtil.IsGesturing(hand, gesture, new List<object>() { grabThreshold });
     }
 
     public bool IsNearby(Handedness hand, float distance, TrackedHandJoint joint = TrackedHandJoint.Palm)
@@ -115,7 +128,7 @@ public class GrabbableHandTracking : MonoBehaviour
         float d = Vector3.Distance(jointTransform.position, this.gameObject.transform.position);
         if(d < distance)
         {
-            Debug.Log("Hand near: " + d);
+            //Debug.Log("Hand near: " + d);
         }
         return d < distance;
     }
