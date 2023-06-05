@@ -9,4 +9,6 @@ public class GestureCallback
 {
     public UnityEvent GestureOnStart;
     public UnityEvent GestureOnEnd;
+/*    public Action OnStartAction;
+    public Action OnEndAction;*/
 }

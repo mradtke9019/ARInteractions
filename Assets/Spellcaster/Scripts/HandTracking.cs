@@ -35,6 +35,8 @@ public class HandTracking : MonoBehaviour
     [SerializeField]
     private float OffsetZAxis = 0.0f;
 
+    [SerializeField]
+    private bool HideWhenNotTracking = true;
 
     private bool _track;
     private IMixedRealityHandJointService _handJointService;
@@ -49,6 +51,11 @@ public class HandTracking : MonoBehaviour
     {
         _track = track;
     }
+    public void SetHideWhenNotTracking(bool value)
+    {
+        HideWhenNotTracking = value;
+    }
+
 
     public void TrackHand(Handedness hand)
     {
@@ -178,6 +185,17 @@ public class HandTracking : MonoBehaviour
         {
             UpdateHandPosition(Handedness, TrackTargetPosition);
             //UpdateHandOrientation(Handedness, TrackTargetOrientation);
+        }
+        else
+        {
+            if(HideWhenNotTracking)
+            {
+                this.gameObject.SetActive(false);
+            }
+            else
+            {
+                this.gameObject.SetActive(true);
+            }
         }
     }
 }

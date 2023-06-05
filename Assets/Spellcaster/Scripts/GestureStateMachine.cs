@@ -53,6 +53,11 @@ public class GestureStateMachine
         return _timeline;
     }
 
+    public Pose GetMostRecentPose()
+    {
+        return _timeline.LatestPose();
+    }
+
     /// <summary>
     /// Return the time history of the poses.
     /// </summary>

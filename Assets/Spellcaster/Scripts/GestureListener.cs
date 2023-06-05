@@ -5,11 +5,17 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 using UnityEngine.Events;
+using System.Threading;
+using Unity.VisualScripting;
+using JetBrains.Annotations;
 
 public class GestureListener : MonoBehaviour
 {
     [SerializeField]
     GestureHandler GestureHandler;
+
+    // Gesture that is being continuously executed
+    private Gesture CurrentlyExecutedGesture;
 
     Handedness _rightHand;
     Handedness _leftHand;
@@ -27,6 +33,7 @@ public class GestureListener : MonoBehaviour
         _poseHandler = new PoseHandler();
         _stateMachine = new GestureStateMachine();
         handJointService = CoreServices.GetInputSystemDataProvider<IMixedRealityHandJointService>();
+        CurrentlyExecutedGesture = null;
     }
 
     // Update is called once per frame
@@ -62,16 +69,21 @@ public class GestureListener : MonoBehaviour
         _stateMachine.ApplyPose(rh);
         //_stateMachine.ApplyPose(lh);
 
-        //List<PoseEvent> lhHistory = _stateMachine.GetPoseHistory(_leftHand);
-        //List<PoseEvent> rhHistory = _stateMachine.GetPoseHistory(_rightHand);
-        //List<float> th = _stateMachine.GetTimeHistory();
-
-        //List<PoseEvent> ph = _stateMachine.GetPoseHistory();
-
-        //GestureType gestureExecuted = _gestureHandler.GetGesture(lhHistory, rhHistory, th);
-        List<PoseEvent> history = _stateMachine.GetPoseHistory();
         PoseTimeline timeline = _stateMachine.GetPoseTimeline();
         Gesture g = GestureHandler.GetGesture(timeline);
+
+
+        // If I am in the middle of a continuosly executed gesture, do not consider executing the same gesture again.
+        // Only allow it to execute the gesture if we have deliberately stopped this continous gesture
+        // The gesture is no longer be executed or a new gesture is being started. Either way, start our on end functions.
+        bool newGestureExecuted = g != null && CurrentlyExecutedGesture != null && CurrentlyExecutedGesture.name != g.name;
+        bool doneExecutingExistingGesture = CurrentlyExecutedGesture != null && CurrentlyExecutedGesture.GetFinalPose() != timeline.LatestPose();
+        if (newGestureExecuted || doneExecutingExistingGesture)
+        {
+            CurrentlyExecutedGesture.GestureCallback.GestureOnEnd.Invoke();
+            CurrentlyExecutedGesture = null;
+        }
+
         //Gesture g = _gestureHandler.GetGesture(history);
         if (g != null)
         {
@@ -79,6 +91,34 @@ public class GestureListener : MonoBehaviour
             GestureCallback callback = g.GestureCallback;
             Debug.Log($"Gesture executed: {g.name}.");
             callback.GestureOnStart.Invoke();
+            if(g.Continuity.type == ContinuityType.Continuous)
+            {
+                CurrentlyExecutedGesture = g;
+            }
+            else if(g.Continuity.type == ContinuityType.Finite && !g.GestureCallback.GestureOnEnd.IsUnityNull() && !g.GestureCallback.GestureOnEnd.IsNull())
+            {
+                // Wait the specified amount of time to execute the on end functions
+                Action a = () =>
+                {
+                    int delay = (int)g.Continuity.Duration * 1000;
+                    Debug.Log($"Waiting {delay} seconds for gesture on end invocation.");
+                    Thread.Sleep(delay);
+                    g.GestureCallback.GestureOnEnd.Invoke();
+                };
+                a.Invoke();
+            }
         }
+
+    }
+    public string GetDebugInfo()
+    {
+        string val = "";
+        PoseTimeline timeline = _stateMachine.GetPoseTimeline();
+        PoseTimelineObject p = timeline.LatestPoseTimeline();
+        if (p == null)
+            return "Null";
+        string name = Enum.GetName(typeof(Pose), p.Pose);
+        val = name + ": " + p.Duration;
+        return val;
     }
 }

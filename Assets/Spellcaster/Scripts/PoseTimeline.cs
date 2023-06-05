@@ -15,7 +15,7 @@ public class PoseTimeline
 
     public void AddPoseEvent(PoseEvent poseEvent)
     {
-        if(Timeline.Count == 0)
+        if (Timeline.Count == 0)
         {
             Timeline.Add(new PoseTimelineObject()
             {
@@ -24,7 +24,7 @@ public class PoseTimeline
             });
         }
 
-        if(Timeline.First().Pose == poseEvent.Pose)
+        if (Timeline.First().Pose == poseEvent.Pose)
         {
             Timeline.First().Duration += poseEvent.TimeDelta;
         }
@@ -43,13 +43,18 @@ public class PoseTimeline
         Timeline.Clear();
     }
 
-    public Pose FirstValidPose()
+    public Pose LatestPose()
     {
-        PoseTimelineObject obj = Timeline.FirstOrDefault(x => x.Pose != Pose.None && x.Pose != Pose.Unknown);
+        PoseTimelineObject obj = Timeline.FirstOrDefault();
         if (obj == null)
         {
             return Pose.None;
         }
         return obj.Pose;
+    }
+    public PoseTimelineObject LatestPoseTimeline()
+    {
+        PoseTimelineObject obj = Timeline.FirstOrDefault();
+        return obj;
     }
 }

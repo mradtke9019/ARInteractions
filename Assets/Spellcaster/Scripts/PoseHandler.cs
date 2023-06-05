@@ -31,25 +31,72 @@ public class PoseHandler
             return Pose.None;
 
         float t = GRAB_THRESHOLD;
-        bool fist = HandPoseUtils.IndexFingerCurl(hand) > t &&
-            HandPoseUtils.MiddleFingerCurl(hand) > t &&
-            HandPoseUtils.RingFingerCurl(hand) > t &&
-            HandPoseUtils.PinkyFingerCurl(hand) > t &&
-            HandPoseUtils.ThumbFingerCurl(hand) > t;
-        if (fist)
-        {
-            Transform handOrientation = handJointService.RequestJointTransform(TrackedHandJoint.Palm, hand);
-            float angle = 0.0f;
-            Vector3 axis = Vector3.zero;
-            handOrientation.rotation.ToAngleAxis(out angle, out axis);
-            axis.Normalize();
-            if (axis.z > 0.7f)
-            {
-                return Pose.FistPalmUp;
-            }
 
+        float index = HandPoseUtils.IndexFingerCurl(hand);
+        float middle = HandPoseUtils.MiddleFingerCurl(hand);
+        float ring = HandPoseUtils.RingFingerCurl(hand);
+        float pinky = HandPoseUtils.PinkyFingerCurl(hand);
+        float thumb = HandPoseUtils.ThumbFingerCurl(hand);
+
+
+        bool fist = index > t &&
+            middle > t &&
+            ring > t &&
+            pinky > t &&
+            thumb > t;
+
+        if (
+            Similar(middle, 0.74f) &&
+            Similar(index, 0.585f) &&
+            Similar(ring, 0.829f) &&
+            Similar(pinky, 0.84f) &&
+            Similar(thumb, 0.55f))
+        {
             return Pose.FistPalmHorizontal;
         }
+
+        if (
+            Similar(middle, 0.64f) &&
+            Similar(index,0.532f) &&
+            Similar(ring, 0.71f) &&
+            Similar(pinky, 0.75f) &&
+            Similar(thumb, 0.199f))
+        {
+            return Pose.ThumbsUp;
+        }
+
+        if (
+            Similar(middle, 0.005f) &&
+            Similar(index, 0.01f) &&
+            Similar(ring, 0.01f) &&
+            Similar(pinky, 0.03f) &&
+            Similar(thumb, 0.35f))
+        {
+            return Pose.PalmOut;
+        }
+        /*
+                if (fist)
+                {
+                    Transform handOrientation = handJointService.RequestJointTransform(TrackedHandJoint.Palm, hand);
+                    float angle = 0.0f;
+                    Vector3 axis = Vector3.zero;
+                    handOrientation.rotation.ToAngleAxis(out angle, out axis);
+                    axis.Normalize();
+                    if (axis.z > 0.7f)
+                    {
+                        return Pose.FistPalmUp;
+                    }
+
+                    return Pose.FistPalmHorizontal;
+                }*/
         return Pose.None;
+    }
+
+    private bool Similar(float value, float center, float threshold = 0.15f)
+    {
+        float min = center - threshold;
+        float max = center + threshold;
+
+        return value > min && value < max;
     }
 }

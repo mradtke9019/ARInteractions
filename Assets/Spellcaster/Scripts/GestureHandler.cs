@@ -31,7 +31,8 @@ public class GestureHandler
         {
             // Start in reverse order of the requirements to see if the gesture has been executed.
             List<PoseRequirement> requirements = gesture.Requirements.PoseRequirements;
-            int currRequirement = 0;
+            int totalRequirements = requirements.Count - 1;
+            int currRequirement = totalRequirements;
             float currRequirementTime = 0.0f;
             List<bool> requirementSatisfied = Enumerable.Repeat(false, requirements.Count).ToList();
             Pose previousPose = Pose.None;
@@ -54,7 +55,7 @@ public class GestureHandler
                     if(currRequirementTime >= requirement.Duration)
                     {
                         requirementSatisfied[currRequirement] = true;
-                        currRequirement++;
+                        currRequirement--;
                         previousPose = requirement.Pose;
                         currRequirementTime = 0.0f;
                     }
@@ -62,7 +63,7 @@ public class GestureHandler
                 else if(timeDurationEvent.Pose != requirement.Pose && requirement.Pose != Pose.None)
                 {
                     // Our current data is a mismatch, so need to restart search since our data was interrupted by a pose not part of the current gesture.
-                    currRequirement = 0;
+                    currRequirement = totalRequirements;
                     requirementSatisfied = Enumerable.Repeat(false, requirements.Count).ToList();
                     previousPose = Pose.None;
                     currRequirementTime = 0.0f;

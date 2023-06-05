@@ -14,7 +14,7 @@ public enum ContinuityType
 public class Continuity 
 {
     [SerializeField]
-    ContinuityType type;
+    public ContinuityType type;
     [SerializeField]
-    float Duration;
+    public float Duration;
 }
