@@ -30,6 +30,18 @@ public class PoseHandler
         if (!handJointService.IsHandTracked(hand))
             return Pose.None;
 
+        HandData handData = DataCollectionManager.GetHandData(hand, handJointService);
+        return PredictPose(handData);
+    }
+
+    /// <summary>
+    /// Using a pre trained machine learning model, predict from the hand data what kind of pose is being executed by the hand.
+    /// </summary>
+    /// <param name="handData"></param>
+    /// <returns></returns>
+    public Pose PredictPose(HandData handData)
+    {
+        Handedness hand = handData.Hand["Hand"] == 1.0f ? Handedness.Right : Handedness.Left;
         float t = GRAB_THRESHOLD;
 
         float index = HandPoseUtils.IndexFingerCurl(hand);
@@ -57,7 +69,7 @@ public class PoseHandler
 
         if (
             Similar(middle, 0.64f) &&
-            Similar(index,0.532f) &&
+            Similar(index, 0.532f) &&
             Similar(ring, 0.71f) &&
             Similar(pinky, 0.75f) &&
             Similar(thumb, 0.199f))

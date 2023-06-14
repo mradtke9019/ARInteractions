@@ -32,7 +32,7 @@ public class DataCollectionManager : InputActionHandler
 
         if(RecordRight)
         {
-            HandData hand = GetHandData(Handedness.Right);
+            HandData hand = GetHandData(Handedness.Right, handJointService);
             rightHandData.Add(hand);
             CurrentDurationRight += Time.deltaTime;
             if(CurrentDurationRight > RecordDuration)
@@ -44,7 +44,7 @@ public class DataCollectionManager : InputActionHandler
         }
         if (RecordLeft)
         {
-            HandData hand = GetHandData(Handedness.Left);
+            HandData hand = GetHandData(Handedness.Left, handJointService);
             leftHandData.Add(hand);
             CurrentDurationLeft += Time.deltaTime;
             if (CurrentDurationLeft > RecordDuration)
@@ -68,15 +68,25 @@ public class DataCollectionManager : InputActionHandler
         handJointService = CoreServices.GetInputSystemDataProvider<IMixedRealityHandJointService>();
     }
 
-    public HandData GetHandData(Handedness hand)
+    public static HandData GetHandData(Handedness hand, IMixedRealityHandJointService service)
     {
-        DataPath = Application.dataPath;
+        if (!service.IsHandTracked(hand))
+        {
+            return null;
+        }
         HandData data = new HandData();
         var enums = Enum.GetValues(typeof(TrackedHandJoint));
         string handName = Enum.GetName(typeof(Handedness), hand);
 
-        DataPath = Path.Combine(DataPath, "HandData", handName);
-        
+        if(hand == Handedness.Right)
+        {
+            data.Hand.Add("Hand", 1.0f);
+        }
+        if (hand == Handedness.Left)
+        {
+            data.Hand.Add("Hand", -1.0f);
+        }
+
         float index = HandPoseUtils.IndexFingerCurl(hand);
         float middle = HandPoseUtils.MiddleFingerCurl(hand);
         float ring = HandPoseUtils.RingFingerCurl(hand);
@@ -91,7 +101,7 @@ public class DataCollectionManager : InputActionHandler
 
         foreach (TrackedHandJoint joint in enums)
         {
-            Transform jointTransform = handJointService.RequestJointTransform(joint, Handedness.Right);
+            Transform jointTransform = service.RequestJointTransform(joint, Handedness.Right);
             if(jointTransform != null)
             //if (HandJointUtils.TryGetJointPose(joint, Handedness.Right, out MixedRealityPose pose))
             {
@@ -152,6 +162,7 @@ public class DataCollectionManager : InputActionHandler
             }
 
         }
+
         return data;
     }
 
@@ -172,6 +183,8 @@ public class DataCollectionManager : InputActionHandler
     public void SaveHandData(List<HandData> data)
     {
         DateTime now = DateTime.Now;
+        DataPath = Application.dataPath;
+        DataPath = Path.Combine(DataPath, "HandData");
         string time = now.ToString("yyyy_MM_dd.hh_mm_ss_FFF");
         string json = "[" + string.Join(",", data.Select(x => x.ToJsonString())) + "]";
         string path = Path.Combine(DataPath, time);
