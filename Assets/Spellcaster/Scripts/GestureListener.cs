@@ -8,6 +8,7 @@ using UnityEngine.Events;
 using System.Threading;
 using Unity.VisualScripting;
 using JetBrains.Annotations;
+using System.Threading.Tasks;
 
 public class GestureListener : MonoBehaviour
 {
@@ -95,14 +96,14 @@ public class GestureListener : MonoBehaviour
             {
                 CurrentlyExecutedGesture = g;
             }
-            else if(g.Continuity.type == ContinuityType.Finite && !g.GestureCallback.GestureOnEnd.IsUnityNull() && !g.GestureCallback.GestureOnEnd.IsNull())
+            else if(g.Continuity.type == ContinuityType.Finite && !g.GestureCallback.GestureOnEnd.IsUnityNull() && !g.GestureCallback.GestureOnEnd.IsNull() && g.Continuity.Duration > 0)
             {
                 // Wait the specified amount of time to execute the on end functions
                 Action a = () =>
                 {
                     int delay = (int)g.Continuity.Duration * 1000;
                     Debug.Log($"Waiting {delay} seconds for gesture on end invocation.");
-                    Thread.Sleep(delay);
+                    Task.Delay(delay);
                     g.GestureCallback.GestureOnEnd.Invoke();
                 };
                 a.Invoke();

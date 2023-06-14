@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 public class Projectile : MonoBehaviour
@@ -35,20 +36,24 @@ public class Projectile : MonoBehaviour
 
     public void Launch()
     {
+        Stopwatch watch = Stopwatch.StartNew();
         launchDuration = 0;
         launching = true;
         this.gameObject.transform.position = ProjectilePath.GetOrigin();
         this.gameObject.SetActive(true);
         initialLaunchDirection = ProjectilePath.GetDirection().normalized;
+        UnityEngine.Debug.Log($"Launch took {watch.Elapsed}");
     }
 
     public void Launch(Projectable projectable)
     {
+        Stopwatch watch = Stopwatch.StartNew();
         launchDuration = 0;
         ProjectilePath = projectable;
         launching = true;
         this.gameObject.transform.position = ProjectilePath.GetOrigin();
         this.gameObject.SetActive(true);
         initialLaunchDirection = ProjectilePath.GetDirection().normalized;
+        UnityEngine.Debug.Log($"Launch took {watch.Elapsed}");
     }
 }

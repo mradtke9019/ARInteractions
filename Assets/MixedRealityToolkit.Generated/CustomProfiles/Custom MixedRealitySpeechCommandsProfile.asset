@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1f18fec9b55c4f818e284af454161962, type: 3}
-  m_Name: RecordArticulatedHandPoseSpeechCommandsProfile
+  m_Name: Custom MixedRealitySpeechCommandsProfile
   m_EditorClassIdentifier: 
   isCustomProfile: 1
   startBehavior: 0
@@ -37,3 +37,17 @@ MonoBehaviour:
       id: 7
       description: Grip Press
       axisConstraint: 3
+  - localizationKey: 
+    keyword: Right
+    keyCode: 0
+    action:
+      id: 16
+      description: Record Right Hand
+      axisConstraint: 0
+  - localizationKey: 
+    keyword: Left
+    keyCode: 0
+    action:
+      id: 17
+      description: Record Left Hand
+      axisConstraint: 0
