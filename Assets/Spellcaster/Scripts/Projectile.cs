@@ -42,7 +42,6 @@ public class Projectile : MonoBehaviour
         this.gameObject.transform.position = ProjectilePath.GetOrigin();
         this.gameObject.SetActive(true);
         initialLaunchDirection = ProjectilePath.GetDirection().normalized;
-        UnityEngine.Debug.Log($"Launch took {watch.Elapsed}");
     }
 
     public void Launch(Projectable projectable)
@@ -54,6 +53,5 @@ public class Projectile : MonoBehaviour
         this.gameObject.transform.position = ProjectilePath.GetOrigin();
         this.gameObject.SetActive(true);
         initialLaunchDirection = ProjectilePath.GetDirection().normalized;
-        UnityEngine.Debug.Log($"Launch took {watch.Elapsed}");
     }
 }

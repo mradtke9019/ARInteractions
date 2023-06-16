@@ -488,11 +488,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3114657579147795549, guid: b0f8c2a88c85f304b8f35fd8276fd645, type: 3}
       propertyPath: Requirements.PoseRequirements.Array.data[0].Duration
-      value: 0.5
+      value: 0.33
       objectReference: {fileID: 0}
     - target: {fileID: 3114657579147795549, guid: b0f8c2a88c85f304b8f35fd8276fd645, type: 3}
       propertyPath: Requirements.PoseRequirements.Array.data[1].Duration
-      value: 1
+      value: 0.75
       objectReference: {fileID: 0}
     - target: {fileID: 3114657579147795549, guid: b0f8c2a88c85f304b8f35fd8276fd645, type: 3}
       propertyPath: GestureCallback.GestureOnEnd.m_PersistentCalls.m_Calls.Array.size
@@ -1397,15 +1397,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3114657579147795549, guid: b0f8c2a88c85f304b8f35fd8276fd645, type: 3}
       propertyPath: Requirements.PoseRequirements.Array.data[1].Pose
-      value: 13
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 3114657579147795549, guid: b0f8c2a88c85f304b8f35fd8276fd645, type: 3}
       propertyPath: Requirements.PoseRequirements.Array.data[0].Duration
-      value: 0.5
+      value: 0.33
       objectReference: {fileID: 0}
     - target: {fileID: 3114657579147795549, guid: b0f8c2a88c85f304b8f35fd8276fd645, type: 3}
       propertyPath: Requirements.PoseRequirements.Array.data[1].Duration
-      value: 1
+      value: 0.75
       objectReference: {fileID: 0}
     - target: {fileID: 3114657579147795549, guid: b0f8c2a88c85f304b8f35fd8276fd645, type: 3}
       propertyPath: GestureCallback.GestureOnEnd.m_PersistentCalls.m_Calls.Array.size

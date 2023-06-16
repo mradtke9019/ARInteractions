@@ -5,19 +5,18 @@ using UnityEngine;
 
 [Serializable]
 public enum Pose 
-{ 
+{
     None, 
     Unknown, 
-    FistPalmUp,
-    FistPalmHorizontal, 
+    Fist,
     Pinch,
     ThumbsUp, 
     ThumbsDown, 
-    ThumbSideways,
-    FingerGuns, 
-    Ok, 
+    FingerGuns,
+    Point,
     Shaka,
     SnapStart,
-    IndexPointing,
-    PalmOut
+    PalmOut,
+    WebSlinging,
+    PeaceSign
 };
