@@ -75,3 +75,4 @@ crashlytics-build.properties
 #others
 .vsconfig
 /Assets/HandData
+/MachineLearning/__pycache__
