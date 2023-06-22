@@ -84,7 +84,7 @@ public class PoseHandler
             Similar(pinky, 0.03f) &&
             Similar(thumb, 0.35f))
         {
-            return Pose.PalmOut;
+            return Pose.Palm;
         }
         /*
                 if (fist)

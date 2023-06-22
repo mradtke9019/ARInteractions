@@ -104,7 +104,7 @@ public class GestureHandler
                 {
                     PoseEvent currEvent = filteredHistory[i];
                     // This is not the pose. Move on
-                    if (currEvent.Pose != poseRequirement.Pose && currEvent.Pose != Pose.None && currEvent.Pose != Pose.Unknown)
+                    if (currEvent.Pose != poseRequirement.Pose && currEvent.Pose != Pose.None)
                     {
                         continue;
                     }

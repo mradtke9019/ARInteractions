@@ -62,7 +62,7 @@ public class GestureListener : MonoBehaviour
         {
             Debug.Log("Left hand pose: " + Enum.GetName(typeof(Pose), lh.Pose));
         }*/
-        if (rh.Pose != Pose.None && rh.Pose != Pose.Unknown)
+        if (rh.Pose != Pose.None)
         {
             Debug.Log("Right hand pose: " + Enum.GetName(typeof(Pose), rh.Pose));
         }

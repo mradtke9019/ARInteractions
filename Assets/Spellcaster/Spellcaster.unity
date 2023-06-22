@@ -476,7 +476,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3114657579147795549, guid: b0f8c2a88c85f304b8f35fd8276fd645, type: 3}
       propertyPath: Requirements.PoseRequirements.Array.data[0].Pose
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3114657579147795549, guid: b0f8c2a88c85f304b8f35fd8276fd645, type: 3}
       propertyPath: Requirements.PoseRequirements.Array.data[1].Hand
@@ -484,7 +484,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3114657579147795549, guid: b0f8c2a88c85f304b8f35fd8276fd645, type: 3}
       propertyPath: Requirements.PoseRequirements.Array.data[1].Pose
-      value: 5
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 3114657579147795549, guid: b0f8c2a88c85f304b8f35fd8276fd645, type: 3}
       propertyPath: Requirements.PoseRequirements.Array.data[0].Duration
@@ -1389,7 +1389,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3114657579147795549, guid: b0f8c2a88c85f304b8f35fd8276fd645, type: 3}
       propertyPath: Requirements.PoseRequirements.Array.data[0].Pose
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3114657579147795549, guid: b0f8c2a88c85f304b8f35fd8276fd645, type: 3}
       propertyPath: Requirements.PoseRequirements.Array.data[1].Hand
@@ -1397,7 +1397,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3114657579147795549, guid: b0f8c2a88c85f304b8f35fd8276fd645, type: 3}
       propertyPath: Requirements.PoseRequirements.Array.data[1].Pose
-      value: 12
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 3114657579147795549, guid: b0f8c2a88c85f304b8f35fd8276fd645, type: 3}
       propertyPath: Requirements.PoseRequirements.Array.data[0].Duration

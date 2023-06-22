@@ -7,7 +7,6 @@ using UnityEngine;
 public enum Pose 
 {
     None, 
-    Unknown, 
     Fist,
     Pinch,
     ThumbsUp, 
@@ -15,7 +14,7 @@ public enum Pose
     Point,
     Shaka,
     SnapStart,
-    PalmOut,
+    Palm,
     WebSlinging,
     PeaceSign
 };
