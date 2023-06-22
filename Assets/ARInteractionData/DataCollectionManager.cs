@@ -75,6 +75,7 @@ public class DataCollectionManager : InputActionHandler
             return null;
         }
         HandData data = new HandData();
+        data.Hand.Add("Label", float.MaxValue);
         var enums = Enum.GetValues(typeof(TrackedHandJoint));
         string handName = Enum.GetName(typeof(Handedness), hand);
 
@@ -93,11 +94,11 @@ public class DataCollectionManager : InputActionHandler
         float pinky = HandPoseUtils.PinkyFingerCurl(hand);
         float thumb = HandPoseUtils.ThumbFingerCurl(hand);
 
-        data.Hand.Add(handName + "IndexCurl", index);
-        data.Hand.Add(handName + "MiddleCurl", middle);
-        data.Hand.Add(handName + "RingCurl", ring);
-        data.Hand.Add(handName + "PinkyCurl", pinky);
-        data.Hand.Add(handName + "ThumbCurl", thumb);
+        data.Hand.Add("IndexCurl", index);
+        data.Hand.Add("MiddleCurl", middle);
+        data.Hand.Add("RingCurl", ring);
+        data.Hand.Add("PinkyCurl", pinky);
+        data.Hand.Add("ThumbCurl", thumb);
 
         foreach (TrackedHandJoint joint in enums)
         {
@@ -162,7 +163,6 @@ public class DataCollectionManager : InputActionHandler
             }
 
         }
-
         return data;
     }
 
