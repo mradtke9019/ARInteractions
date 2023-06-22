@@ -5,13 +5,13 @@ using UnityEngine;
 
 public class TMPTextUpdate : MonoBehaviour
 {
-    public GameObject Target;
+    public GameObject GestureListenerTarget;
     private GestureListener gestureListener;
     private TextMeshProUGUI tmp;
     private void Start()
     {
         tmp = this.GetComponent<TextMeshProUGUI>();
-        gestureListener = Target.GetComponent<GestureListener>();
+        gestureListener = GestureListenerTarget.GetComponent<GestureListener>();
     }
 
     // Update is called once per frame
