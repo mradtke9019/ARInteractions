@@ -191,12 +191,14 @@ class MLModel:
         print(len(names), len(weights))
         for i in range(len(weights)):
             print(names[i], weights[i])
-            
+
     # https://onnx.ai/sklearn-onnx/
     def ExportModelToONNX(self, path = "./"):
         from skl2onnx import convert_sklearn
         from skl2onnx.common.data_types import FloatTensorType
-        onx = convert_sklearn(self.model)
-        targetPath = os.path.join(path, "Model" + self.ModelType +".onnx")
+        initial_type = [('float_input', FloatTensorType([None, 573]))]
+        onx = convert_sklearn(self.model, initial_types = initial_type)
+        targetPath = os.path.join(path, "Model" + self.type +".onnx")
         with open(targetPath, "wb") as f:
             f.write(onx.SerializeToString())
+            
