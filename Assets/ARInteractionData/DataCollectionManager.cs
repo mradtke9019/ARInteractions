@@ -33,25 +33,33 @@ public class DataCollectionManager : InputActionHandler
         if(RecordRight)
         {
             HandData hand = GetHandData(Handedness.Right, handJointService);
-            rightHandData.Add(hand);
+            if(hand != null)
+            {
+                rightHandData.Add(hand);
+            }
             CurrentDurationRight += Time.deltaTime;
             if(CurrentDurationRight > RecordDuration)
             {
                 Debug.Log("Finished Recording Right hand");
-                SaveHandData(rightHandData);
                 RecordRight = false;
+                CurrentDurationRight = 0.0f;
+                SaveHandData(rightHandData);
             }
         }
         if (RecordLeft)
         {
             HandData hand = GetHandData(Handedness.Left, handJointService);
+            if (hand != null)
+            {
             leftHandData.Add(hand);
+            }
             CurrentDurationLeft += Time.deltaTime;
             if (CurrentDurationLeft > RecordDuration)
             {
                 Debug.Log("Finished Recording Left hand");
-                SaveHandData(leftHandData);
                 RecordLeft = false;
+                CurrentDurationLeft = 0.0f;
+                SaveHandData(leftHandData);
             }
         }
     }
@@ -183,15 +191,25 @@ public class DataCollectionManager : InputActionHandler
     public void SaveHandData(List<HandData> data)
     {
         DateTime now = DateTime.Now;
-        DataPath = Application.dataPath;
-        DataPath = Path.Combine(DataPath, "HandData");
-        string time = now.ToString("yyyy_MM_dd.hh_mm_ss_FFF");
-        string json = "[" + string.Join(",", data.Select(x => x.ToJsonString())) + "]";
-        string path = Path.Combine(DataPath, time);
-        if(!Directory.Exists(DataPath))
+        List<string> paths = new List<string>()
         {
-            Directory.CreateDirectory(DataPath);
-        }
-        File.WriteAllText(path + ".json", json);
+            Application.temporaryCachePath,
+            Application.persistentDataPath,
+            Application.dataPath,
+            Path.GetTempPath()
+        };
+        //DataPath = Path.Combine(DataPath);
+        string time = now.ToString("yyyy_MM_dd.hh_mm_ss_FFF") + "HandData";
+        string json = "[" + string.Join(",", data.Select(x => x.ToJsonString())) + "]";
+        paths.ForEach(p =>
+        {
+            Debug.Log("Saving to: " + p);
+            string path = Path.Combine(p, time);
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            File.WriteAllText(path + ".json", json);
+        });
     }
 }

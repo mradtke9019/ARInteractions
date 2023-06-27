@@ -76,3 +76,5 @@ crashlytics-build.properties
 .vsconfig
 /Assets/HandData
 /MachineLearning/__pycache__
+/hooks
+/lfs/objects/da/45
