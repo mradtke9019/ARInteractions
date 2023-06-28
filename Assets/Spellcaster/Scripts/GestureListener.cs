@@ -14,7 +14,7 @@ public class GestureListener : MonoBehaviour
 {
     [SerializeField]
     GestureHandler GestureHandler;
-
+    public string OnnxModel;
     // Gesture that is being continuously executed
     private Gesture CurrentlyExecutedGesture;
 
@@ -31,7 +31,7 @@ public class GestureListener : MonoBehaviour
         _rightHand= Handedness.Right;
         _leftHand = Handedness.Left;
         //GestureHandler = new GestureHandler();
-        _poseHandler = new PoseHandler();
+        _poseHandler = new PoseHandler(OnnxModel);
         _stateMachine = new GestureStateMachine();
         handJointService = CoreServices.GetInputSystemDataProvider<IMixedRealityHandJointService>();
         CurrentlyExecutedGesture = null;

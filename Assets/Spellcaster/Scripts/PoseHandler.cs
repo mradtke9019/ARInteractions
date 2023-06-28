@@ -14,10 +14,12 @@ public class PoseHandler
     private const float GRAB_THRESHOLD = 0.3f;
     private const bool DEBUG = false;
     private IMixedRealityHandJointService handJointService;
+    private MLModel Model;
 
-    public PoseHandler()
+    public PoseHandler(string OnnxModelPath)
     {
         handJointService = CoreServices.GetInputSystemDataProvider<IMixedRealityHandJointService>();
+        Model = new MLModel(OnnxModelPath);
     }
 
     /// <summary>
@@ -41,6 +43,8 @@ public class PoseHandler
     /// <returns></returns>
     public Pose PredictPose(HandData handData)
     {
+        return Model.Predict(handData);
+
         Handedness hand = handData.Hand["Hand"] == 1.0f ? Handedness.Right : Handedness.Left;
         float t = GRAB_THRESHOLD;
 
