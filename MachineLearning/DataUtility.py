@@ -22,6 +22,8 @@ from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
+from joblib import dump, load
+
 
 
 # Merge all the json files into a single one with labels
@@ -201,4 +203,9 @@ class MLModel:
         targetPath = os.path.join(path, "Model" + self.type +".onnx")
         with open(targetPath, "wb") as f:
             f.write(onx.SerializeToString())
+
+    # https://scikit-learn.org/stable/model_persistence.html
+    def ExportModel(self, path = "./"):
+        targetPath = os.path.join(path, "Model" + self.type +".joblib")
+        dump(self.model, targetPath) 
             
