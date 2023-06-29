@@ -1,4 +1,4 @@
-using Microsoft.ML.Data;
+/*using Microsoft.ML.Data;
 using Microsoft.ML.Transforms.Onnx;
 using System;
 namespace Assets.ARInteractionData
@@ -580,4 +580,4 @@ namespace Assets.ARInteractionData
         public float PinkyTipZLocalPosition { get; set; }
     }
 
-}
+}*/
