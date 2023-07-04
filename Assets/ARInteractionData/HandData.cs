@@ -25,7 +25,6 @@ public class HandData : IData
 
     public string ToFlaskParameter()
     {
-        //return ToJsonString();
         string json = string.Empty;
 
         var data = Hand.Select(x => x.Value);

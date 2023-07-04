@@ -16,7 +16,6 @@ using UnityEngine.XR;
 public class DataCollectionManager : InputActionHandler
 {
     private IMixedRealityHandJointService handJointService;
-    public string PoseName = "ThumbsUp";
     private string DataPath;
     public float RecordDuration = 1.0f;
     private float CurrentDurationRight = 0.0f;
