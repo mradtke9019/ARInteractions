@@ -6,14 +6,14 @@ using UnityEngine;
 [Serializable]
 public enum Pose 
 {
-    None, 
+    None,
     Fist,
     Pinch,
     ThumbsUp, 
     ThumbsDown,
     Point,
     Shaka,
-    SnapStart,
+    //SnapStart,
     Palm,
     WebSlinging,
     PeaceSign

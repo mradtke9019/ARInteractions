@@ -16,7 +16,7 @@ MonoBehaviour:
   Origin: 2
   Direction: 2
   DirectionOffsetX: 45
-  DirectionOffsetY: 90
+  DirectionOffsetY: 45
   DirectionOffsetZ: 0
   Speed: 1
   Duration: 5

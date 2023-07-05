@@ -9,12 +9,13 @@ using System.Threading;
 using Unity.VisualScripting;
 using JetBrains.Annotations;
 using System.Threading.Tasks;
+using System.Linq;
 
 public class GestureListener : MonoBehaviour
 {
     [SerializeField]
     GestureHandler GestureHandler;
-    public string OnnxModel;
+    public MLModel Model = MLModel.KNN;
     // Gesture that is being continuously executed
     private Gesture CurrentlyExecutedGesture;
 
@@ -24,6 +25,9 @@ public class GestureListener : MonoBehaviour
     PoseHandler _poseHandler;
     GestureStateMachine _stateMachine;
     private IMixedRealityHandJointService handJointService;
+    private ApplicationMode mode = ApplicationMode.Listening;
+
+    private Dictionary<string, List<string>> gestureNameCombos;
 
     // Start is called before the first frame update
     void Start()
@@ -31,15 +35,21 @@ public class GestureListener : MonoBehaviour
         _rightHand= Handedness.Right;
         _leftHand = Handedness.Left;
         //GestureHandler = new GestureHandler();
-        _poseHandler = new PoseHandler(OnnxModel);
+        _poseHandler = new PoseHandler(Model);
         _stateMachine = new GestureStateMachine();
         handJointService = CoreServices.GetInputSystemDataProvider<IMixedRealityHandJointService>();
         CurrentlyExecutedGesture = null;
+        gestureNameCombos = GestureHandler.GetGestureCombos();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if(mode != ApplicationMode.Listening)
+        {
+            return;
+        }
+
         float delta = Time.deltaTime;
         DateTime timeStamp = DateTime.Now;
         PoseEvent rh = new PoseEvent()
@@ -111,15 +121,45 @@ public class GestureListener : MonoBehaviour
         }
 
     }
+    public void SetModeRecording()
+    {
+        this.mode = ApplicationMode.Recording;
+    }
+
+    public void SetModeListening()
+    {
+        this.mode = ApplicationMode.Listening;
+    }
+
+    public void SetApplicationMode(ApplicationMode mode)
+    {
+        this.mode = mode;
+    }
+
     public string GetDebugInfo()
     {
         string val = "";
+        
+        if(mode == ApplicationMode.Recording)
+        {
+            return "In recording mode." + Environment.NewLine + 
+                "Say 'Listen' to being gesture interactions";
+        }
+
+
         PoseTimeline timeline = _stateMachine.GetPoseTimeline();
         PoseTimelineObject p = timeline.LatestPoseTimeline();
         if (p == null)
             return "Null";
         string name = Enum.GetName(typeof(Pose), p.Pose);
         val = name + ": " + p.Duration;
+        val += Environment.NewLine;
+        val += "Combos:" + Environment.NewLine;
+        foreach (var key in gestureNameCombos.Keys)
+        {
+            val += key + ": " + string.Join(", " , gestureNameCombos[key].Select(x => x)) + Environment.NewLine;
+        }
+
         return val;
     }
 }

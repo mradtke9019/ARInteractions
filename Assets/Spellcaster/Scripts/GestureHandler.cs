@@ -14,7 +14,7 @@ using UnityEngine.XR;
 [Serializable]
 public class GestureHandler
 {
-    [SerializeField]
+    //[SerializeField]
     public List<Gesture> Gestures;
 
     /// <summary>
@@ -174,5 +174,16 @@ public class GestureHandler
         }
 
         return null;*/
+    }
+
+    public Dictionary<string,List<string>> GetGestureCombos()
+    {
+        Dictionary<string, List<string>> result = new Dictionary<string, List<string>>();
+        foreach (var gesture in Gestures)
+        {
+            result.Add(gesture.name,gesture.Requirements.PoseRequirements.Select(x => Enum.GetName(typeof(Pose), x.Pose)).ToList());
+        }
+
+        return result;
     }
 }

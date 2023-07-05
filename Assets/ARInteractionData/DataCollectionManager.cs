@@ -192,9 +192,7 @@ public class DataCollectionManager : InputActionHandler
         DateTime now = DateTime.Now;
         List<string> paths = new List<string>()
         {
-            Application.temporaryCachePath,
             Application.persistentDataPath,
-            Application.dataPath,
             Path.GetTempPath()
         };
         //DataPath = Path.Combine(DataPath);

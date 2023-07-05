@@ -5,21 +5,31 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.Serialization;
 using UnityEngine.XR;
 
-public class PoseHandler
+public class PoseHandler 
 {
     private const float GRAB_THRESHOLD = 0.3f;
     private const bool DEBUG = false;
     private IMixedRealityHandJointService handJointService;
-    private MLModel Model;
+    private MLModel model;
+    string modelName;
 
-    public PoseHandler(string OnnxModelPath)
+
+    public PoseHandler(MLModel model)
     {
         handJointService = CoreServices.GetInputSystemDataProvider<IMixedRealityHandJointService>();
-        Model = new MLModel(OnnxModelPath);
+        string name = Enum.GetName(typeof(MLModel), model);
+        this.model = model;
+        modelName = name;
+
+
+        Debug.Log("Using model " + name);
     }
 
     /// <summary>
@@ -41,71 +51,40 @@ public class PoseHandler
     /// </summary>
     /// <param name="handData"></param>
     /// <returns></returns>
-    public Pose PredictPose(HandData handData)
+    public Pose PredictPose(IData handData)
     {
-        return Model.Predict(handData);
+        string address = null;
+        string localAddress = "127.0.0.1";
+        string remoteAddress = "192.168.0.101";
+        address = Application.isEditor ? localAddress : remoteAddress;
+        
+        string url = $"http://{address}:5000/pose?needScale=true&model={modelName}";
+        // Convert the object to JSON
+        string jsonBody = handData.ToFlaskParameter();
+        Pose result = Pose.None;
 
-        Handedness hand = handData.Hand["Hand"] == 1.0f ? Handedness.Right : Handedness.Left;
-        float t = GRAB_THRESHOLD;
-
-        float index = HandPoseUtils.IndexFingerCurl(hand);
-        float middle = HandPoseUtils.MiddleFingerCurl(hand);
-        float ring = HandPoseUtils.RingFingerCurl(hand);
-        float pinky = HandPoseUtils.PinkyFingerCurl(hand);
-        float thumb = HandPoseUtils.ThumbFingerCurl(hand);
-
-
-        bool fist = index > t &&
-            middle > t &&
-            ring > t &&
-            pinky > t &&
-            thumb > t;
-
-        if (
-            Similar(middle, 0.74f) &&
-            Similar(index, 0.585f) &&
-            Similar(ring, 0.829f) &&
-            Similar(pinky, 0.84f) &&
-            Similar(thumb, 0.55f))
+        using (HttpClient httpClient = new HttpClient())
         {
-            return Pose.Fist;
-        }
+            StringContent content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-        if (
-            Similar(middle, 0.64f) &&
-            Similar(index, 0.532f) &&
-            Similar(ring, 0.71f) &&
-            Similar(pinky, 0.75f) &&
-            Similar(thumb, 0.199f))
-        {
-            return Pose.ThumbsUp;
-        }
+            HttpResponseMessage response = httpClient.PostAsync(url, content).Result;
 
-        if (
-            Similar(middle, 0.005f) &&
-            Similar(index, 0.01f) &&
-            Similar(ring, 0.01f) &&
-            Similar(pinky, 0.03f) &&
-            Similar(thumb, 0.35f))
-        {
-            return Pose.Palm;
-        }
-        /*
-                if (fist)
-                {
-                    Transform handOrientation = handJointService.RequestJointTransform(TrackedHandJoint.Palm, hand);
-                    float angle = 0.0f;
-                    Vector3 axis = Vector3.zero;
-                    handOrientation.rotation.ToAngleAxis(out angle, out axis);
-                    axis.Normalize();
-                    if (axis.z > 0.7f)
-                    {
-                        return Pose.FistPalmUp;
-                    }
+            string responseContent = response.Content.ReadAsStringAsync().Result;
 
-                    return Pose.FistPalmHorizontal;
-                }*/
-        return Pose.None;
+            if (response.IsSuccessStatusCode)
+            {
+                // Request successful
+/*                string r = responseContent.Trim();
+                float f = float.Parse(r);*/
+                result = (Pose)System.Enum.Parse(typeof(Pose), responseContent.Replace('\"',' ').Trim());
+            }
+            else
+            {
+                // Request failed
+                Console.WriteLine("Error: " + responseContent);
+            }
+        }
+        return result;
     }
 
     private bool Similar(float value, float center, float threshold = 0.15f)

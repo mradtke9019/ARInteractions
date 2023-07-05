@@ -65,3 +65,9 @@ MonoBehaviour:
   - id: 17
     description: Record Left Hand
     axisConstraint: 0
+  - id: 18
+    description: Start Recording
+    axisConstraint: 0
+  - id: 19
+    description: Start Listening
+    axisConstraint: 0
