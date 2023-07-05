@@ -23,23 +23,39 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 from joblib import dump, load
-
-
+from sklearn import svm
+from PlotUtility import *
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.pipeline import make_pipeline
 
 # Merge all the json files into a single one with labels
-def MergeJsonAndLabel(directory, destinationDir):
+def MergeJsonAndLabel(directory, destinationDir, label="Classifier"):
     outputKeys = {}
-    outputKeys["None"] = 0
-    outputKeys["Fist"] = 1
-    outputKeys["Pinch"] = 2
-    outputKeys["ThumbsUp"] = 3
-    outputKeys["ThumbsDown"]=4
-    outputKeys["Point"]=5
-    outputKeys["Shaka"]=6
-    outputKeys["SnapStart"]=7
-    outputKeys["Palm"]=8
-    outputKeys["WebSlinging"]=9
-    outputKeys["PeaceSign"]=10
+    if label == "Classifier":
+        outputKeys["None"] = "None"
+        outputKeys["Fist"] = "Fist"
+        outputKeys["Pinch"] = "Pinch"
+        outputKeys["ThumbsUp"] = "ThumbsUp"
+        outputKeys["ThumbsDown"]="ThumbsDown"
+        outputKeys["Point"]="Point"
+        outputKeys["Shaka"]="Shaka"
+        outputKeys["SnapStart"]="SnapStart"
+        outputKeys["Palm"]="Palm"
+        outputKeys["WebSlinging"]="WebSlinging"
+        outputKeys["PeaceSign"]="PeaceSign"
+    else:
+        outputKeys["None"] = 0
+        outputKeys["Fist"] = 1
+        outputKeys["Pinch"] = 2
+        outputKeys["ThumbsUp"] = 3
+        outputKeys["ThumbsDown"]=4
+        outputKeys["Point"]=5
+        outputKeys["Shaka"]=6
+        outputKeys["SnapStart"]=7
+        outputKeys["Palm"]=8
+        outputKeys["WebSlinging"]=9
+        outputKeys["PeaceSign"]=10
     jsonList = []
     # All files and directories ending with .txt and that don't begin with a dot:
     jsonFiles = glob.iglob(directory + '**/*.json', recursive=True)
@@ -62,26 +78,90 @@ def MergeJsonAndLabel(directory, destinationDir):
     with open(outPath, "w") as jsonFile:
         jsonFile.write(jsonStr)
     return outPath
+
+
+# Given a dataset and some hyperparameters, plot the error. Returns the mean squared error and std deviation
+def PerformKFoldsValidationAndPlot(modeltype, dataset, hyperparameters, hyperparameterLabel, yLabel = "Mean Squared Error",scale = False, Qs = None, folds = 5):
+    kf = KFold(n_splits = folds)
+    m = []
+    std = []
+    x = np.array(dataset.trainX)
+    y = np.array(dataset.trainY)
+    if scale:
+        x = np.array(dataset.trainXScaled)
+
+    # print("Length x and y", len(x), len(y))
+    for h in hyperparameters:
+        if modeltype == "KNN":
+            model = KNeighborsClassifier(n_neighbors = h)
+        elif modeltype == "SVC":
+            model = SVC(C = 1/(2 * h))
+        
+        temp = []
+        for train,test in kf.split(x):
+            model.fit(x[train], y[train])
+            yPred = model.predict(x[test])
+            # Compare the prediction to the actual
+            error = np.mean( yPred != y[test] )
+            score = 1.0 - error
+
+            temp.append(score)
+        
+        mean = np.array(temp).mean()
+        STD = np.array(temp).std()
+        m.append(mean)
+        std.append(STD)
+    title = modeltype + " classification. 5 FoldsCV for " + hyperparameterLabel
+    if scale:
+        title += " (scaled input)"
+    MeanSquareErrorPlot(title, hyperparameterLabel + " values", hyperparameters, m, std, yLabel = yLabel)
+    return m, std
+
+
+def TestValidationAccuracy(ModelType, dataset, c = None, K = None, scaleInput = True):
+    print("Getting Validation accuracy for " + ModelType)
+    x = np.array(dataset.trainX)
+    y = np.array(dataset.trainY)
+    if scaleInput:
+        x = np.array(dataset.trainXScaled)
+
     
+    if ModelType == "KNN":
+        model = KNeighborsClassifier(n_neighbors = K)
+    elif ModelType == "SVC":
+        model = SVC(C = 1/(2 * c), probability=True)
+    y = dataset.trainY
+    model.fit(x,y)
+
+    yPred = model.predict(dataset.validateXScaled)
+    yActual = dataset.validateY
+    # Compare the prediction to the actual
+    error = np.mean( yPred != yActual )
+    score = 1.0 - error
+    
+    print("Validation Accuracy for " + ModelType, ":", score)
 
 
 class Dataset:
-    def __init__(self, file,splitPercentage = .9, Debug = False):
+    def __init__(self, file,splitPercentage = .9, Debug = True):
         df = pd.read_json(file)
-        if Debug:
-            print(df.head())
-            print(df.info())
         
         numRowsTrain = int(splitPercentage * df.shape[0])
         numRowsValidate = df.shape[0] - numRowsTrain
         #https://stackoverflow.com/questions/29576430/shuffle-dataframe-rows
         df = shuffle(df, random_state = 0)
         df.reset_index(inplace=True, drop=True)
+
+        if Debug:
+            print(df.head())
+            print(df.info())
+
         self.X = df.iloc[:,1:]
         self.y = df.iloc[:,0]
         self.ColumnNames = df.columns[1:]
         # https://scikit-learn.org/stable/modules/preprocessing.html
         scaler = preprocessing.StandardScaler().fit(self.X)
+        self.scaler = scaler
         self.XScaled = scaler.transform(self.X)
         
         self.trainX = self.X.iloc[:numRowsTrain]
@@ -120,92 +200,51 @@ class MLModel:
         self.type = None
         self.yPred = None
         self.model = None
-    def TrainModel(self, ModelType, x, y, c = None, K = None):
-        assert(self.type == None and ModelType in ["Lasso", "Ridge", "KNN"])
+        self.scaler = None
+
+    def AssignModelAndHyperParameters(self, ModelType, c = None, K = None):
+        assert(self.type == None and ModelType in ["KNN", "SVC"])
         self.type = ModelType
-        if ModelType == "Lasso":
-            self.model = linear_model.Lasso(alpha=(1/(2 * c)))
-        elif ModelType == "Ridge":
-            self.model = linear_model.Ridge(alpha=(1/(2 * c)))
-        elif ModelType == "KNN":
-            self.model = KNeighborsRegressor(n_neighbors = K)
+        if ModelType == "KNN":
+            self.model = KNeighborsClassifier(n_neighbors = K)
+            self.K = K
+        elif ModelType == "SVC":
+            self.model = SVC(C = 1/(2 * c), probability=True)
+            self.C = 1/(2 * c)
             #assert (False)
+        # print("Fitting " + self.type)
+
+    def TrainModel(self, dataset, scaleInput = True):
+        assert(self.model != None and self.type != None)
         print("Fitting " + self.type)
-        self.model.fit(x, y)
-        
-        if ModelType in ["Lasso", "Ridge"]:
-            self.thetas.append(self.model.intercept_)
-            for data in self.model.coef_:
-                self.thetas.append(data)
+        x = dataset.X.values
+        y = dataset.y
+        self.isScaled = False
+        if scaleInput:
+            self.isScaled = True
+            x = np.array(dataset.XScaled)
+            self.scaler = dataset.scaler
 
-    def KFoldsValidation(self, ModelType, x, y, hyperparameter = None, folds = 5):
-        kf = KFold(n_splits = folds)
-        assert(self.type == None and ModelType in ["Lasso", "Ridge", "KNN"])
-        self.type = ModelType
-        self.meanError = []
-        self.stdError = []
-        # Use current polynomial features and 
-        # C value to perform k folds validation
-        if ModelType == "Lasso":
-            self.model = linear_model.Lasso(alpha=(1/(2 * hyperparameter)))
-        elif ModelType == "Ridge":
-            self.model = linear_model.Ridge(alpha=(1/(2 * hyperparameter)))
-        elif ModelType == "KNN":
-            return self.KFoldsKNN(x,y,hyperparameter, folds)
-            
-        
-        temp = []
-        for train,test in kf.split(x):
-            self.model.fit(x[train], y[train])
-            yPred = self.model.predict(x[test])
-            # append the F1 Score for the currently trained model
-            temp.append(mean_squared_error(y[test],yPred))
-        
-        self.meanError = np.array(temp).mean()
-        self.stdError = np.array(temp).std()
-        return self.meanError, self.stdError
-    
-    def KFoldsKNN(self, x, y, K, folds = 5):
-        kf = KFold(n_splits = folds)
-        self.model = KNeighborsRegressor(n_neighbors = K)
-        self.meanError = []
-        self.stdError = []
+        self.model.fit(x,y)
 
-        temp = []
-        for train,test in kf.split(x):
-            self.model.fit(x[train], y[train])
-            yPred = self.model.predict(x[test])
-            
-            temp.append(mean_squared_error(y[test],yPred))
-        
-        self.meanError = np.array(temp).mean()
-        self.stdError = np.array(temp).std()
-        return self.meanError, self.stdError
-    def Predict(self, x, y):
+    def Predict(self, x, scale = False):
         assert self.type != None
-        yPred = self.model.predict(x)
-        mse = mean_squared_error(y,yPred)
-        return mse
+        xInput = x
+        if scale and self.isScaled == True:
+            xInput = np.array(self.scaler.transform(x))
+        
+        yPred = self.model.predict(xInput)
+        return yPred
     
-    def PrintWeights(self, names):
-        assert(self.type in ["Lasso", "Ridge"])
-        weights = self.thetas[1:]
-        print(len(names), len(weights))
-        for i in range(len(weights)):
-            print(names[i], weights[i])
-
-    # https://onnx.ai/sklearn-onnx/
-    def ExportModelToONNX(self, path = "./"):
-        from skl2onnx import convert_sklearn
-        from skl2onnx.common.data_types import FloatTensorType
-        initial_type = [('float_input', FloatTensorType([None, 573]))]
-        onx = convert_sklearn(self.model, initial_types = initial_type)
-        targetPath = os.path.join(path, "Model" + self.type +".onnx")
-        with open(targetPath, "wb") as f:
-            f.write(onx.SerializeToString())
+    def LoadModel(self, path, mType, dataset, scale = True):
+        print("Loading model", path)
+        self.type = mType
+        self.model = load(path)
+        if scale:
+            self.isScaled = True
+            self.scaler = dataset.scaler
 
     # https://scikit-learn.org/stable/model_persistence.html
     def ExportModel(self, path = "./"):
         targetPath = os.path.join(path, "Model" + self.type +".joblib")
         dump(self.model, targetPath) 
-            

@@ -51,11 +51,11 @@ def PlotHelper(title, xLabel, yLabel, scatterData = None, plotData = None, histo
     plt.legend()
     plt.show()
 
-def MeanSquareErrorPlot(title, xLabel, xVals, mse, std):
+def MeanSquareErrorPlot(title, xLabel, xVals, mse, std, yLabel = "Mean Squared Error"):
     fig = plt.figure() 
     ax = plt.axes()
     ax.set_title(title)
     plt.xlabel(xLabel)
-    plt.ylabel("Mean Squared Error")   
+    plt.ylabel(yLabel)   
     plt.errorbar(xVals, mse, yerr=std)
     plt.show()
