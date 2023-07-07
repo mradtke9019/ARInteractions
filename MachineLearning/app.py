@@ -10,7 +10,6 @@ import json
 import numpy as np
 from PlotUtility import *
 from DataUtility import *
-
 app = Flask(__name__)
 api = Api(app)
 
@@ -25,16 +24,8 @@ import warnings
 warnings.warn = warn
 
 cwd = os.path.abspath(sys.path[0])
-# # dataPath = "./Data/"
-# # mergedDataPath = MergeJsonAndLabel(dataPath, "./")
-# dataset = Dataset(os.path.join(cwd,"Final.Json"), Debug=True)
-
-# idealK = 13
-# KNNX = dataset.trainX
-# KNN = MLModel()
-# KNN.TrainModel("KNN", dataset.X, dataset.y, K = idealK)
-# model = load(os.path.join(cwd,'ModelKNN.joblib'))
 dataset = Dataset(os.path.join(cwd, "Final.json"), Debug = True)
+datasetRotation = Dataset(os.path.join(cwd, "RotationFinal.json"), Debug = True)
 # idealK = 51
 KNNModel = MLModel()
 # KNNModel.AssignModelAndHyperParameters("KNN", K = idealK)
@@ -42,11 +33,13 @@ KNNModel = MLModel()
 KNNModel.LoadModel(os.path.join(cwd, "ModelKNN.joblib"), "KNN" , dataset, True)
 
 # idealC = 10
-SVCModel = MLModel()
-# SVCModel.AssignModelAndHyperParameters("SVC", c = idealC)
-# SVCModel.TrainModel(dataset, True)
-SVCModel.LoadModel(os.path.join(cwd, "ModelSVC.joblib"), "SVC", dataset, True)
-print("Classes", SVCModel.model.classes_)
+SVCModelOriginal = MLModel()
+SVCModelOriginal.LoadModel(os.path.join(cwd, "ModelSVC.joblib"), "SVC", dataset, True)
+
+
+SVCModelRotation = MLModel()
+SVCModelRotation.LoadModel(os.path.join(cwd, "RotationFeaturesModelSVC.joblib"), "SVC", datasetRotation, True)
+print("Classes", SVCModelOriginal.model.classes_)
 
 class Pose(Resource):
     def get(self):
@@ -61,27 +54,40 @@ class Pose(Resource):
         needScale = args["needScale"]
         m = args["model"]
 
+
+        featureCount = -1
         x = None
         body = request.get_json()
         if "data" in body:
             x = body["data"]
             x = np.array(x)
+            featureCount = len(x)
             x = x.reshape(1,-1)
+        elif ("right" in body) and ("left" in body):
+            x = [body["left"], body["right"]]
+            featureCount = len(body["left"])
+            x = np.array(x)
+            # x = x.reshape(1,-1)
         else:
             x = df = pd.DataFrame([body])
+            featureCount = len(body)
         # print("x", x)
         chosenModel = None
+        # print("FeatureCount", featureCount)
+        
 
         if m == "KNN":
             chosenModel = KNNModel
-        elif m == "SVC":
-            chosenModel = SVCModel
+        elif m == "SVC" and featureCount == 411:
+            chosenModel = SVCModelRotation
+        elif m == "SVC" and featureCount == 573:
+            chosenModel = SVCModelOriginal
         # probabilities = chosenModel.model.predict_proba(x)
         # print("Probs", probabilities)
         out = chosenModel.Predict(x, scale = needScale)
         # print("Change")
         # print("Prediction",out)
-        return out[0], 200  # return data and 200 OK
+        return out.tolist()
                     
                     
 api.add_resource(Pose, '/pose')  # add endpoints

@@ -30,7 +30,7 @@ from sklearn.svm import SVC
 from sklearn.pipeline import make_pipeline
 
 # Merge all the json files into a single one with labels
-def MergeJsonAndLabel(directory, destinationDir, label="Classifier"):
+def MergeJsonAndLabel(directory, destinationDir, fileName = "Final.json", label="Classifier"):
     outputKeys = {}
     if label == "Classifier":
         outputKeys["None"] = "None"
@@ -74,7 +74,7 @@ def MergeJsonAndLabel(directory, destinationDir, label="Classifier"):
         f.close()
     
     jsonStr = json.dumps([ob for ob in jsonList])
-    outPath = os.path.join(destinationDir, "Final.json")
+    outPath = os.path.join(destinationDir, fileName)
     with open(outPath, "w") as jsonFile:
         jsonFile.write(jsonStr)
     return outPath
@@ -245,6 +245,7 @@ class MLModel:
             self.scaler = dataset.scaler
 
     # https://scikit-learn.org/stable/model_persistence.html
-    def ExportModel(self, path = "./"):
-        targetPath = os.path.join(path, "Model" + self.type +".joblib")
+    def ExportModel(self, path = "./", prefixName = ""):
+        targetPath = os.path.join(path, prefixName + "Model" + self.type +".joblib")
+        print("Saving model", targetPath)
         dump(self.model, targetPath) 
