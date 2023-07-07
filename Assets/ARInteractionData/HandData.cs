@@ -23,13 +23,17 @@ public class HandData : IData
         return json;
     }
 
-    public string ToFlaskParameter()
+    public string ToFlaskParameter(string key = "data", bool wrap = true)
     {
         string json = string.Empty;
 
         var data = Hand.Select(x => x.Value);
         data = data.Skip(1);
-        json = "{\"data\":[" + string.Join(",", data) + "]}";
+        json = "\"" + key + "\":[" + string.Join(",", data) + "]";
+        if (wrap)
+        {
+            json = "{" + json + "}";
+        }
 
         return json;
     }

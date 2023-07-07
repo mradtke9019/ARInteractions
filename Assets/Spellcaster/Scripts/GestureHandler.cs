@@ -22,11 +22,18 @@ public class GestureHandler
     /// </summary>
     /// <param name="timeline">The timeline of the poses executed stored in recent order. The most recent elements will be in the beginning with the last events happening at the end of the list.</param>
     /// <returns></returns>
-    public Gesture GetGesture(PoseTimeline timeline)
+    public Gesture GetGesture(PoseTimeline timeline, float WildcardFactor, Handedness hand = Handedness.None)
     {
+        // If we want hand specific gestures, get them
+        List<PoseTimelineObject> timelineObjects = timeline.Timeline;
+        if(hand != Handedness.None)
+        {
+            timelineObjects = timeline.Timelines[hand];
+        }
+
         // Only consider gestures which even have all of the poses
-        var availablePoses = timeline.Timeline.Select(x => x.Pose).ToList().Distinct();
-        var filteredGestures = Gestures.Where(x => x.Requirements.PoseRequirements.All(y => availablePoses.Contains(y.Pose)));
+        IEnumerable<Pose> availablePoses = timelineObjects.Select(x => x.Pose).ToList().Distinct();
+        List<Gesture> filteredGestures = Gestures;//.Where(x => x.Requirements.PoseRequirements.All(y => availablePoses.Contains(y.Pose)));
         foreach (var gesture in filteredGestures)
         {
             // Start in reverse order of the requirements to see if the gesture has been executed.
@@ -37,9 +44,9 @@ public class GestureHandler
             List<bool> requirementSatisfied = Enumerable.Repeat(false, requirements.Count).ToList();
             Pose previousPose = Pose.None;
             // Check if the events in the timeline match the requirements of the current gesture.
-            for(int i = 0; i < timeline.Timeline.Count; i++)
+            for(int i = 0; i < timelineObjects.Count; i++)
             {
-                PoseTimelineObject timeDurationEvent = timeline.Timeline[i];
+                PoseTimelineObject timeDurationEvent = timelineObjects[i];
                 PoseRequirement requirement = requirements[currRequirement];
 
                 // If the current pose is none, thats fine. Move on.
@@ -59,6 +66,11 @@ public class GestureHandler
                         previousPose = requirement.Pose;
                         currRequirementTime = 0.0f;
                     }
+                }
+                else if (timeDurationEvent.Duration <= WildcardFactor)
+                {
+                    // If our current pose found is not a match, still potentially wait for a time to see if we accidentally predicted a wrong intermediate pose
+                    continue;
                 }
                 else if(timeDurationEvent.Pose != requirement.Pose && requirement.Pose != Pose.None)
                 {

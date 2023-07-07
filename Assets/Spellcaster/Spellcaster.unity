@@ -2420,6 +2420,8 @@ MonoBehaviour:
     - {fileID: 1458265580}
     - {fileID: 696454634}
   Model: 1
+  ApplicationMode: 1
+  WildcardFactor: 0.15
 --- !u!4 &1136596417
 Transform:
   m_ObjectHideFlags: 0

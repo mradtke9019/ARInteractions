@@ -4,10 +4,7 @@ using Microsoft.MixedReality.Toolkit.Utilities;
 using UnityEngine;
 using System.Collections.Generic;
 using System;
-using UnityEngine.Events;
-using System.Threading;
 using Unity.VisualScripting;
-using JetBrains.Annotations;
 using System.Threading.Tasks;
 using System.Linq;
 
@@ -16,18 +13,22 @@ public class GestureListener : MonoBehaviour
     [SerializeField]
     GestureHandler GestureHandler;
     public MLModel Model = MLModel.KNN;
+    public ApplicationMode ApplicationMode = ApplicationMode.Listening;
+    public float WildcardFactor = 0.15f;
+
+
+    PoseHandler _poseHandler;
+    GestureStateMachine _stateMachine;
+
     // Gesture that is being continuously executed
     private Gesture CurrentlyExecutedGesture;
 
     Handedness _rightHand;
     Handedness _leftHand;
-
-    PoseHandler _poseHandler;
-    GestureStateMachine _stateMachine;
     private IMixedRealityHandJointService handJointService;
-    private ApplicationMode mode = ApplicationMode.Listening;
 
     private Dictionary<string, List<string>> gestureNameCombos;
+
 
     // Start is called before the first frame update
     void Start()
@@ -45,17 +46,21 @@ public class GestureListener : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(mode != ApplicationMode.Listening)
+        if(ApplicationMode != ApplicationMode.Listening)
         {
             return;
         }
 
         float delta = Time.deltaTime;
         DateTime timeStamp = DateTime.Now;
+
+        // Get the poses for both hands
+        List<Pose> poses = _poseHandler.GetPoses();
+
         PoseEvent rh = new PoseEvent()
         {
             Hand = _rightHand,
-            Pose = _poseHandler.GetPose(_rightHand),
+            Pose = poses.Last(),
             TimeDelta = delta,
             TimeStamp = timeStamp
         };
@@ -63,25 +68,26 @@ public class GestureListener : MonoBehaviour
         PoseEvent lh = new PoseEvent()
         {
             Hand = _leftHand,
-            Pose = _poseHandler.GetPose(_leftHand),
+            Pose = poses.First(),
             TimeDelta = delta,
             TimeStamp = timeStamp
         };
 
-/*        if(lh.Pose != Pose.None && lh.Pose != Pose.Unknown)
+/*        if (lh.Pose != Pose.None)
         {
             Debug.Log("Left hand pose: " + Enum.GetName(typeof(Pose), lh.Pose));
-        }*/
+        }
         if (rh.Pose != Pose.None)
         {
             Debug.Log("Right hand pose: " + Enum.GetName(typeof(Pose), rh.Pose));
-        }
+        }*/
 
         _stateMachine.ApplyPose(rh);
+        _stateMachine.ApplyPose(lh);
         //_stateMachine.ApplyPose(lh);
-
+        //_stateMachine.CoalesceTimeline(WildcardFactor);
         PoseTimeline timeline = _stateMachine.GetPoseTimeline();
-        Gesture g = GestureHandler.GetGesture(timeline);
+        Gesture g = GestureHandler.GetGesture(timeline, WildcardFactor, _rightHand); // TODO: Remove right hand hard coding
 
 
         // If I am in the middle of a continuosly executed gesture, do not consider executing the same gesture again.
@@ -123,24 +129,24 @@ public class GestureListener : MonoBehaviour
     }
     public void SetModeRecording()
     {
-        this.mode = ApplicationMode.Recording;
+        this.ApplicationMode = ApplicationMode.Recording;
     }
 
     public void SetModeListening()
     {
-        this.mode = ApplicationMode.Listening;
+        this.ApplicationMode = ApplicationMode.Listening;
     }
 
     public void SetApplicationMode(ApplicationMode mode)
     {
-        this.mode = mode;
+        this.ApplicationMode = mode;
     }
 
     public string GetDebugInfo()
     {
         string val = "";
         
-        if(mode == ApplicationMode.Recording)
+        if(ApplicationMode == ApplicationMode.Recording)
         {
             return "In recording mode." + Environment.NewLine + 
                 "Say 'Listen' to being gesture interactions";
@@ -148,12 +154,22 @@ public class GestureListener : MonoBehaviour
 
 
         PoseTimeline timeline = _stateMachine.GetPoseTimeline();
-        PoseTimelineObject p = timeline.LatestPoseTimeline();
-        if (p == null)
+        PoseTimelineObject left = timeline.LatestPoseTimeline(_leftHand);
+        PoseTimelineObject right = timeline.LatestPoseTimeline(_rightHand);
+        if (left == null && right == null)
+        {
             return "Null";
-        string name = Enum.GetName(typeof(Pose), p.Pose);
-        val = name + ": " + p.Duration;
-        val += Environment.NewLine;
+        }
+        if(left != null)
+        {
+            string leftName = "Left: " + (left != null ? Enum.GetName(typeof(Pose), left.Pose) : Enum.GetName(typeof(Pose), Pose.None));
+            val += leftName + ", " + left.Duration + Environment.NewLine;
+        }
+        if(right != null)
+        {
+            string rightName = "Right: " + (right != null ? Enum.GetName(typeof(Pose), right.Pose) : Enum.GetName(typeof(Pose), Pose.None));
+            val += rightName + ", " + right.Duration + Environment.NewLine;
+        }
         val += "Combos:" + Environment.NewLine;
         foreach (var key in gestureNameCombos.Keys)
         {
