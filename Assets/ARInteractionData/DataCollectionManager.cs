@@ -18,10 +18,8 @@ public class DataCollectionManager : InputActionHandler
     private IMixedRealityHandJointService handJointService;
     private string DataPath;
     public float RecordDuration = 1.0f;
-    private float CurrentDurationRight = 0.0f;
-    private float CurrentDurationLeft = 0.0f;
-    private bool RecordRight;
-    private bool RecordLeft;
+    private float CurrentDuration = 0.0f;
+    private bool Record;
     private List<HandData> rightHandData;
     private List<HandData> leftHandData;
 
@@ -29,36 +27,27 @@ public class DataCollectionManager : InputActionHandler
     {
         base.Update();
 
-        if(RecordRight)
+        if(Record)
         {
-            HandData hand = GetHandData(Handedness.Right, handJointService);
-            if(hand != null)
+            HandData right = GetHandData(Handedness.Right, handJointService);
+            if(right != null)
             {
-                rightHandData.Add(hand);
+                rightHandData.Add(right);
             }
-            CurrentDurationRight += Time.deltaTime;
-            if(CurrentDurationRight > RecordDuration)
+
+            HandData left = GetHandData(Handedness.Left, handJointService);
+            if (left != null)
             {
-                Debug.Log("Finished Recording Right hand");
-                RecordRight = false;
-                CurrentDurationRight = 0.0f;
-                SaveHandData(rightHandData);
+                leftHandData.Add(left);
             }
-        }
-        if (RecordLeft)
-        {
-            HandData hand = GetHandData(Handedness.Left, handJointService);
-            if (hand != null)
+            CurrentDuration += Time.deltaTime;
+            if(CurrentDuration > RecordDuration)
             {
-            leftHandData.Add(hand);
-            }
-            CurrentDurationLeft += Time.deltaTime;
-            if (CurrentDurationLeft > RecordDuration)
-            {
-                Debug.Log("Finished Recording Left hand");
-                RecordLeft = false;
-                CurrentDurationLeft = 0.0f;
-                SaveHandData(leftHandData);
+                Debug.Log("Finished Recording Hands");
+                Record = false;
+                CurrentDuration = 0.0f;
+                SaveHandData(rightHandData, "Right");
+                SaveHandData(leftHandData, "Left");
             }
         }
     }
@@ -66,10 +55,8 @@ public class DataCollectionManager : InputActionHandler
     protected override void Start()
     {
         base.Start();
-        RecordRight = false;
-        RecordLeft = false;
-        CurrentDurationRight = 0.0f;
-        CurrentDurationLeft = 0.0f;
+        Record = false;
+        CurrentDuration = 0.0f;
         rightHandData = new List<HandData>();
         leftHandData = new List<HandData>();
         handJointService = CoreServices.GetInputSystemDataProvider<IMixedRealityHandJointService>();
@@ -123,12 +110,12 @@ public class DataCollectionManager : InputActionHandler
                 data.Hand.Add(eulerY, pose.rotation.eulerAngles.y);
                 data.Hand.Add(eulerZ, pose.rotation.eulerAngles.z);
 
-                string positionX = jointName + "XPosition";
+/*                string positionX = jointName + "XPosition";
                 string positionY = jointName + "YPosition";
                 string positionZ = jointName + "ZPosition";
                 data.Hand.Add(positionX, pose.position.x);
                 data.Hand.Add(positionY, pose.position.y);
-                data.Hand.Add(positionZ, pose.position.z);
+                data.Hand.Add(positionZ, pose.position.z);*/
 
 
 
@@ -161,12 +148,12 @@ public class DataCollectionManager : InputActionHandler
                 data.Hand.Add(eulerLocalY, pose.localEulerAngles.y);
                 data.Hand.Add(eulerLocalZ, pose.localEulerAngles.z);
 
-                string positionLocalX = jointName + "XLocalPosition";
+/*                string positionLocalX = jointName + "XLocalPosition";
                 string positionLocalY = jointName + "YLocalPosition";
                 string positionLocalZ = jointName + "ZLocalPosition";
                 data.Hand.Add(positionLocalX, pose.localPosition.x);
                 data.Hand.Add(positionLocalY, pose.localPosition.y);
-                data.Hand.Add(positionLocalZ, pose.localPosition.z);
+                data.Hand.Add(positionLocalZ, pose.localPosition.z);*/
             }
 
         }
@@ -175,20 +162,25 @@ public class DataCollectionManager : InputActionHandler
 
     public void StartRecordingRight()
     {
-        RecordRight = true;
-        CurrentDurationRight = 0.0f;
+        Record = true;
+        CurrentDuration = 0.0f;
         rightHandData = new List<HandData>();
+        leftHandData = new List<HandData>();
     }
 
     public void StartRecordingLeft()
     {
-        RecordLeft = true;
-        CurrentDurationLeft = 0.0f;
+/*        RecordLeft = true;
+        CurrentDurationLeft = 0.0f;*/
         leftHandData = new List<HandData>();
     }
 
-    public void SaveHandData(List<HandData> data)
+    public void SaveHandData(List<HandData> data, string prefix = "")
     {
+        if(data.Count <= 0 || data.All(x => x ==null))
+        {
+            return;
+        }
         DateTime now = DateTime.Now;
         List<string> paths = new List<string>()
         {
@@ -196,16 +188,16 @@ public class DataCollectionManager : InputActionHandler
             Path.GetTempPath()
         };
         //DataPath = Path.Combine(DataPath);
-        string time = now.ToString("yyyy_MM_dd.hh_mm_ss_FFF") + "HandData";
+        string fileName = prefix + now.ToString("yyyy_MM_dd.hh_mm_ss_FFF") + "HandData";
         string json = "[" + string.Join(",", data.Select(x => x.ToJsonString())) + "]";
         paths.ForEach(p =>
         {
             Debug.Log("Saving to: " + p);
-            string path = Path.Combine(p, time);
-            if (!Directory.Exists(path))
+            if (!Directory.Exists(p))
             {
-                Directory.CreateDirectory(path);
+                Directory.CreateDirectory(p);
             }
+            string path = Path.Combine(p, fileName);
             File.WriteAllText(path + ".json", json);
         });
     }
