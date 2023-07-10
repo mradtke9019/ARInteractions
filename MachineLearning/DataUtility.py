@@ -28,6 +28,7 @@ from PlotUtility import *
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 from sklearn.pipeline import make_pipeline
+from sklearn.svm import LinearSVC
 
 # Merge all the json files into a single one with labels
 def MergeJsonAndLabel(directory, destinationDir, fileName = "Final.json", label="Classifier"):
@@ -92,10 +93,15 @@ def PerformKFoldsValidationAndPlot(modeltype, dataset, hyperparameters, hyperpar
 
     # print("Length x and y", len(x), len(y))
     for h in hyperparameters:
+        print(h)
         if modeltype == "KNN":
             model = KNeighborsClassifier(n_neighbors = h)
         elif modeltype == "SVC":
             model = SVC(C = 1/(2 * h))
+        elif modeltype == "LinearSVCL1":
+            model = LinearSVC(penalty='l1',loss='squared_hinge',C = 1/(2 * h), dual="auto")
+        elif modeltype == "LinearSVCL2":
+            model = LinearSVC(penalty='l2', C = 1/(2 * h),max_iter=1000)
         
         temp = []
         for train,test in kf.split(x):
@@ -130,6 +136,10 @@ def TestValidationAccuracy(ModelType, dataset, c = None, K = None, scaleInput = 
         model = KNeighborsClassifier(n_neighbors = K)
     elif ModelType == "SVC":
         model = SVC(C = 1/(2 * c), probability=True)
+    elif ModelType == "LinearSVCL1":
+        model = LinearSVC(penalty='l1', loss='squared_hinge',C = 1/(2 * c), dual="auto")
+    elif ModelType == "LinearSVCL2":
+        model = LinearSVC(penalty='l2', C = 1/(2 * c),max_iter=1000)
     y = dataset.trainY
     model.fit(x,y)
 
@@ -203,13 +213,19 @@ class MLModel:
         self.scaler = None
 
     def AssignModelAndHyperParameters(self, ModelType, c = None, K = None):
-        assert(self.type == None and ModelType in ["KNN", "SVC"])
+        assert(self.type == None and ModelType in ["KNN", "SVC", "LinearSVCL1", "LinearSVCL2"])
         self.type = ModelType
         if ModelType == "KNN":
             self.model = KNeighborsClassifier(n_neighbors = K)
             self.K = K
         elif ModelType == "SVC":
             self.model = SVC(C = 1/(2 * c), probability=True)
+            self.C = 1/(2 * c)
+        elif ModelType == "LinearSVCL1":
+            self.model = LinearSVC(penalty='l1', loss='squared_hinge', C = 1/(2 * c), dual="auto")
+            self.C = 1/(2 * c)
+        elif ModelType == "LinearSVCL2":
+            self.model = LinearSVC(penalty='l2', C = 1/(2 * c),max_iter=1000)
             self.C = 1/(2 * c)
             #assert (False)
         # print("Fitting " + self.type)
@@ -227,14 +243,25 @@ class MLModel:
 
         self.model.fit(x,y)
 
-    def Predict(self, x, scale = False):
+    def Predict(self, xParam, scale = False, validate = False):
         assert self.type != None
-        xInput = x
+        x = xParam
         if scale and self.isScaled == True:
-            xInput = np.array(self.scaler.transform(x))
-        
-        yPred = self.model.predict(xInput)
+            x = np.array(self.scaler.transform(x))
+
+        yPred = self.model.predict(x)
         return yPred
+    
+    # Expects a single item to be predicted on with optimizations
+    def PredictOptimized(self, xParam, scale = False):
+        assert self.type != None
+        x = xParam
+        if scale and self.isScaled == True:
+            x = np.array(self.scaler.transform(x))
+        
+        yPred = self.model.predict(x)
+        return yPred
+    
     
     def LoadModel(self, path, mType, dataset, scale = True):
         print("Loading model", path)

@@ -96,9 +96,13 @@ public class DataCollectionManager : InputActionHandler
 
         foreach (TrackedHandJoint joint in enums)
         {
-            Transform jointTransform = service.RequestJointTransform(joint, Handedness.Right);
+            // Dead feature. Unnessecary
+            if(joint == TrackedHandJoint.None)
+            {
+                continue;
+            }
+            Transform jointTransform = service.RequestJointTransform(joint, hand);
             if(jointTransform != null)
-            //if (HandJointUtils.TryGetJointPose(joint, Handedness.Right, out MixedRealityPose pose))
             {
                 Transform pose = jointTransform;
 

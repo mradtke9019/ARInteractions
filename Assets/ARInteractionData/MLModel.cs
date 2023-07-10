@@ -4,5 +4,6 @@ using System;
 public enum MLModel
 {
     KNN,
-    SVC
+    SVC,
+    LinearSVCL2
 }

@@ -20,12 +20,13 @@ log.disabled = True
 # Ignore warnings from sklearn. https://stackoverflow.com/questions/32612180/eliminating-warnings-from-scikit-learn
 def warn(*args, **kwargs):
     pass
+
 import warnings
 warnings.warn = warn
 
 cwd = os.path.abspath(sys.path[0])
 dataset = Dataset(os.path.join(cwd, "Final.json"), Debug = True)
-datasetRotation = Dataset(os.path.join(cwd, "RotationFinal.json"), Debug = True)
+datasetOptimized = Dataset(os.path.join(cwd, "OptimizedFinal.json"), Debug = True)
 # idealK = 51
 KNNModel = MLModel()
 # KNNModel.AssignModelAndHyperParameters("KNN", K = idealK)
@@ -37,9 +38,12 @@ SVCModelOriginal = MLModel()
 SVCModelOriginal.LoadModel(os.path.join(cwd, "ModelSVC.joblib"), "SVC", dataset, True)
 
 
-SVCModelRotation = MLModel()
-SVCModelRotation.LoadModel(os.path.join(cwd, "RotationFeaturesModelSVC.joblib"), "SVC", datasetRotation, True)
-print("Classes", SVCModelOriginal.model.classes_)
+SVCModelOptimized = MLModel()
+SVCModelOptimized.LoadModel(os.path.join(cwd, "OptimizedFeaturesModelSVC.joblib"), "SVC", datasetOptimized, True)
+print("Classes", SVCModelOptimized.model.classes_)
+
+LinearSVCModel = MLModel()
+LinearSVCModel.LoadModel(os.path.join(cwd, "OptimizedFeaturesLinearModelLinearSVCL2.joblib"), "LinearSVCL2", datasetOptimized, True)
 
 class Pose(Resource):
     def get(self):
@@ -75,16 +79,18 @@ class Pose(Resource):
         chosenModel = None
         # print("FeatureCount", featureCount)
         
-
+        # print("Feature Count", featureCount)
         if m == "KNN":
             chosenModel = KNNModel
-        elif m == "SVC" and featureCount == 411:
-            chosenModel = SVCModelRotation
+        elif m == "SVC" and featureCount == 396:
+            chosenModel = SVCModelOptimized
         elif m == "SVC" and featureCount == 573:
             chosenModel = SVCModelOriginal
-        # probabilities = chosenModel.model.predict_proba(x)
-        # print("Probs", probabilities)
+        elif m == "LinearSVCL2" and featureCount == 396:
+            chosenModel = LinearSVCModel
+            
         out = chosenModel.Predict(x, scale = needScale)
+        # chosenModel.PredictOptimized(x, scale = needScale)
         # print("Change")
         # print("Prediction",out)
         return out.tolist()

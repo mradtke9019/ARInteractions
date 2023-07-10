@@ -18,7 +18,6 @@ public class PoseHandler
     private const bool DEBUG = false;
     private IMixedRealityHandJointService handJointService;
     private MLModel model;
-    string modelName;
     string address = null;
     string localAddress = "127.0.0.1";
     string remoteAddress = "192.168.0.101";
@@ -27,14 +26,16 @@ public class PoseHandler
     public PoseHandler(MLModel model)
     {
         handJointService = CoreServices.GetInputSystemDataProvider<IMixedRealityHandJointService>();
-        string name = Enum.GetName(typeof(MLModel), model);
+        SetModel(model);
+    }
+
+    public void SetModel(MLModel model)
+    {
         this.model = model;
-        modelName = name;
-
         address = Application.isEditor ? localAddress : remoteAddress;
-        url = $"http://{address}:5000/pose?needScale=true&model={modelName}";
+        url = $"http://{address}:5000/pose?needScale=true&model={Enum.GetName(typeof(MLModel), model)}";
 
-        Debug.Log("Using model " + name);
+        Debug.Log("Using model " + Enum.GetName(typeof(MLModel), model));
     }
 
     /// <summary>

@@ -11,8 +11,10 @@ public class HandTracking : MonoBehaviour
     [SerializeField]
     [Tooltip("The target position of the object.")]
     private TrackedHandJoint TrackTargetPosition = TrackedHandJoint.MiddleKnuckle;
+
     [SerializeField]
     [Tooltip("The target orientation of the object.")]
+#pragma warning disable CS0414 // The field 'HandTracking.TrackTargetOrientation' is assigned but its value is never used
     private TrackedHandJoint TrackTargetOrientation = TrackedHandJoint.Palm;
 
     [Header("Transform Offsets")]
