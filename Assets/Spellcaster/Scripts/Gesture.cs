@@ -1,6 +1,5 @@
+using Microsoft.MixedReality.Toolkit.Utilities;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -17,5 +16,9 @@ public class Gesture : MonoBehaviour
     public Pose GetFinalPose()
     {
         return Requirements.PoseRequirements.Last().Pose;
+    }
+    public Handedness FinalPoseHand()
+    {
+        return Requirements.PoseRequirements.Last().Hand;
     }
 }

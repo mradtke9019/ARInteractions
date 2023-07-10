@@ -9,14 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a8871ae424e7184cbc05bfdb457e96c, type: 3}
-  m_Name: Palm Out
+  m_Script: {fileID: 11500000, guid: 5c763874355b11a41886a53eb0c2dfbb, type: 3}
+  m_Name: Right Thumb Tip
   m_EditorClassIdentifier: 
-  Hand: 2
-  Origin: 2
-  Direction: 2
-  DirectionOffsetX: 45
-  DirectionOffsetY: 45
-  DirectionOffsetZ: 0
-  Speed: 1
-  Duration: 5
+  TrackTargetPosition: 6
+  TrackTargetOrientation: 0
+  RotationOffsetXAxis: 0
+  RotationOffsetYAxis: 0
+  RotationOffsetZAxis: 0
+  OffsetXAxis: 0
+  OffsetYAxis: 0
+  OffsetZAxis: 0

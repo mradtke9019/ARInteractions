@@ -10,10 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5c763874355b11a41886a53eb0c2dfbb, type: 3}
-  m_Name: Thumb Tip
+  m_Name: Right Index Tip
   m_EditorClassIdentifier: 
-  TrackTargetPosition: 6
-  TrackTargetOrientation: 0
+  Handedness: 2
+  TrackTargetPosition: 11
+  TrackTargetOrientation: 11
   RotationOffsetXAxis: 0
   RotationOffsetYAxis: 0
   RotationOffsetZAxis: 0

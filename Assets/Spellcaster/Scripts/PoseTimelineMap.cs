@@ -47,6 +47,18 @@ public class PoseTimelineMap
     }
 
     /// <summary>
+    /// Clears the timelines for all hands.
+    /// </summary>
+    /// <param name="hand"></param>
+    public void ClearTimelines()
+    {
+        foreach(var hand in  Timelines.Keys)
+        {
+            Timelines[hand].ClearTimeline();
+        }
+    }
+
+    /// <summary>
     /// Returns the latest pose for a given hand if it exists
     /// </summary>
     /// <param name="hand"></param>

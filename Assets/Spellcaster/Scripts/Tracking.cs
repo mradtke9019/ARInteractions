@@ -14,18 +14,24 @@ public class Tracking : MonoBehaviour
     private bool HideWhenNotTracking;
 
     private bool _track;
+    private bool _trackOrientation;
     private IMixedRealityHandJointService _handJointService;
 
     public void Start()
     {
         HideWhenNotTracking = true;
         _track = false;
+        _trackOrientation = false;
         _handJointService = CoreServices.GetInputSystemDataProvider<IMixedRealityHandJointService>();
     }
 
     public void SetTracking(bool track)
     {
         _track = track;
+    }
+    public void SetTrackingOrientation(bool trackOrientation)
+    {
+        _trackOrientation = trackOrientation;
     }
     public void SetHideWhenNotTracking(bool value)
     {
@@ -74,7 +80,10 @@ public class Tracking : MonoBehaviour
         if (_track)
         {
             UpdateHandPosition(TrackingObject.Handedness, TrackingObject.TrackTargetPosition);
-            //UpdateHandOrientation(Handedness, TrackTargetOrientation);
+            if(_trackOrientation)
+            {
+                UpdateHandOrientation(TrackingObject.Handedness, TrackingObject.TrackTargetOrientation);
+            }
         }
         else
         {

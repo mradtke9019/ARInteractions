@@ -28,11 +28,14 @@ public class Projectable : ScriptableObject
     {
         var _handJointService = CoreServices.GetInputSystemDataProvider<IMixedRealityHandJointService>();
         Transform jointTransform = _handJointService.RequestJointTransform(Direction, Hand);
-        Quaternion orientation = jointTransform.rotation;
+        Vector3 result = -jointTransform.up;
+
+        return result;
+        /*
         orientation *= Quaternion.Euler(0, DirectionOffsetY, 0);
         orientation *= Quaternion.Euler(0, 0, DirectionOffsetZ);
-        orientation *= Quaternion.Euler(DirectionOffsetX, 0, 0);
+        orientation *= Quaternion.Euler(DirectionOffsetX, 0, 0);*/
 
-        return orientation.eulerAngles.normalized;
+        //return orientation.eulerAngles.normalized;
     }
 }

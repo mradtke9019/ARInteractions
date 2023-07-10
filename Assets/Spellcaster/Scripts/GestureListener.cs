@@ -21,7 +21,7 @@ public class GestureListener : MonoBehaviour
     GestureStateMachine _stateMachine;
 
     // Gesture that is being continuously executed
-    private Gesture CurrentlyExecutedGesture;
+    private Dictionary<Handedness, Gesture> CurrentlyExecutedGestures;
 
     Handedness _rightHand;
     Handedness _leftHand;
@@ -39,7 +39,10 @@ public class GestureListener : MonoBehaviour
         _poseHandler = new PoseHandler(Model);
         _stateMachine = new GestureStateMachine();
         handJointService = CoreServices.GetInputSystemDataProvider<IMixedRealityHandJointService>();
-        CurrentlyExecutedGesture = null;
+        CurrentlyExecutedGestures = new Dictionary<Handedness, Gesture>();
+        CurrentlyExecutedGestures.Add(_rightHand, null);
+        CurrentlyExecutedGestures.Add(_leftHand, null);
+
         gestureNameCombos = GestureHandler.GetGestureCombos();
     }
 
@@ -86,39 +89,46 @@ public class GestureListener : MonoBehaviour
         _stateMachine.ApplyPose(rh);
         _stateMachine.ApplyPose(lh);
 
-        // Currently consider each hand by itself for executing gestures
-        foreach(var hand in _stateMachine.PoseTimelineMap.GetTrackedHands())
+
+        PoseTimelineMap timelineMap = _stateMachine.PoseTimelineMap;
+
+
+        // If I am in the middle of a continuosly executed gesture, do not consider executing the same gesture again.
+        // Only allow it to execute the gesture if we have deliberately stopped this continous gesture
+        //bool newGestureExecuted = g != null && CurrentlyExecutedGesture != null && CurrentlyExecutedGesture.name != g.name;
+        // We are done executing the gesture if the currently executed gesture's last pose does not match our current pose
+
+        foreach(var hand in timelineMap.GetTrackedHands())
         {
-            PoseTimeline timeline = _stateMachine.PoseTimelineMap.GetPoseTimeline(hand);
+            // Consider if one of the hands is currently part of a continuous gesture. If so, we should not consider that hand for future gestures.
+            Gesture g = GestureHandler.GetGesture(timelineMap.GetPoseTimeline(hand), WildcardFactor, hand);
 
-            Gesture g = GestureHandler.GetGesture(timeline, WildcardFactor); // TODO: Remove right hand hard coding
 
-
-            // If I am in the middle of a continuosly executed gesture, do not consider executing the same gesture again.
-            // Only allow it to execute the gesture if we have deliberately stopped this continous gesture
-            //bool newGestureExecuted = g != null && CurrentlyExecutedGesture != null && CurrentlyExecutedGesture.name != g.name;
-            // We are done executing the gesture if the currently executed gesture's last pose does not match our current pose
-            bool doneExecutingExistingGesture = CurrentlyExecutedGesture != null && 
-                (CurrentlyExecutedGesture.Requirements.PoseRequirements.Last().Hand == hand && CurrentlyExecutedGesture.GetFinalPose() != timeline.LatestPose());
+            Gesture CurrentlyExecutedGesture = CurrentlyExecutedGestures[hand];
+            bool doneExecutingExistingGesture =
+                CurrentlyExecutedGesture != null &&
+                (CurrentlyExecutedGesture.FinalPoseHand() == hand &&
+                CurrentlyExecutedGesture.GetFinalPose() != timelineMap.LatestPose(hand));
 
 
             // The gesture is no longer be executed or a new gesture is being started. Either way, start our on end functions.
             if (doneExecutingExistingGesture /*|| newGestureExecuted*/)
             {
-                CurrentlyExecutedGesture.GestureCallback.GestureOnEnd.Invoke();
-                CurrentlyExecutedGesture = null;
+                CurrentlyExecutedGestures[hand].GestureCallback.GestureOnEnd.Invoke();
+                CurrentlyExecutedGestures[hand] = null;
             }
 
             //Gesture g = _gestureHandler.GetGesture(history);
             if (g != null)
             {
-                timeline.ClearTimeline();
+                // Since we just executed a gesture, clear the timeline history for all the hands tracked.
+                timelineMap.ClearTimelines();
                 GestureCallback callback = g.GestureCallback;
                 Debug.Log($"Gesture executed: {g.name}.");
                 callback.GestureOnStart.Invoke();
                 if (g.Continuity.type == ContinuityType.Continuous)
                 {
-                    CurrentlyExecutedGesture = g;
+                    CurrentlyExecutedGestures[g.FinalPoseHand()] = g;
                 }
                 else if (g.Continuity.type == ContinuityType.Finite && !g.GestureCallback.GestureOnEnd.IsUnityNull() && !g.GestureCallback.GestureOnEnd.IsNull() && g.Continuity.Duration > 0)
                 {
@@ -133,9 +143,9 @@ public class GestureListener : MonoBehaviour
                     a.Invoke();
                 }
             }
-
         }
     }
+
     public void SetModeRecording()
     {
         this.ApplicationMode = ApplicationMode.Recording;
