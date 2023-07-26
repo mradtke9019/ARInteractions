@@ -91,49 +91,6 @@ public class GestureHandler
         return null;
     }
     
-    
-    /// <summary>
-    /// Given the history of some poses, determine if there is a gesture being executed.
-    /// </summary>
-    /// <param name="history">The history stored in </param>
-    /// <returns></returns>
-    public Gesture GetGesture(PoseTimelineMap timelineMap, float WildcardFactor)
-    {
-        throw new NotImplementedException();
-        List<Handedness> hands = timelineMap.GetTrackedHands().ToList();
-        foreach (var gesture in Gestures)
-        {
-            // Start in reverse order of the requirements to see if the gesture has been executed.
-            List<PoseRequirement> requirements = gesture.Requirements.PoseRequirements;
-            int totalRequirements = requirements.Count - 1;
-            int currRequirement = totalRequirements;
-            float currRequirementTime = 0.0f;
-            List<bool> requirementSatisfied = Enumerable.Repeat(false, requirements.Count).ToList();
-
-            // Create list of previous poses for the hands.
-            Dictionary<Handedness, Pose> previousPose = new Dictionary<Handedness, Pose>();
-            previousPose.AddRange(hands.Select(x => new KeyValuePair<Handedness, Pose>(x, Pose.None)));
-
-
-            Dictionary<Handedness, PoseTimelineObject> visited = new Dictionary<Handedness, PoseTimelineObject>();
-            visited.AddRange(hands.Select(x => new KeyValuePair<Handedness, PoseTimelineObject>(x, new PoseTimelineObject())));
-
-            DateTime threshold = DateTime.Now;
-            // Start at the end of the pose requirements and check if those poses occured
-            for(int i = requirements.Count - 1; i >= 0; i++)
-            {
-                PoseRequirement requirement = requirements[i];
-                Handedness handRequired = requirement.Hand;
-                Pose poseRequired = requirement.Pose;
-                // Check if the hand 
-
-                PoseTimeline timelineForHand = timelineMap.GetPoseTimeline(handRequired);
-                timelineForHand.GetPoseTimelineObjectsBeforeTimestamp(threshold);
-            }
-
-        }
-        return null;
-    }
 
     public Dictionary<string,List<string>> GetGestureCombos()
     {

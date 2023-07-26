@@ -71,3 +71,9 @@ MonoBehaviour:
   - id: 19
     description: Start Listening
     axisConstraint: 0
+  - id: 20
+    description: Toggle Wildcard
+    axisConstraint: 0
+  - id: 21
+    description: Toggle Keyboard
+    axisConstraint: 0

@@ -19,8 +19,8 @@ public class PoseHandler
     private IMixedRealityHandJointService handJointService;
     private MLModel model;
     string address = null;
-    string localAddress = "127.0.0.1";
-    string remoteAddress = "192.168.0.101";
+    private string localAddress = "127.0.0.1";
+    string IPAddress = "192.168.0.101";
     string url;
 
     public PoseHandler(MLModel model)
@@ -32,10 +32,16 @@ public class PoseHandler
     public void SetModel(MLModel model)
     {
         this.model = model;
-        address = Application.isEditor ? localAddress : remoteAddress;
+        address = Application.isEditor ? localAddress : IPAddress;
         url = $"http://{address}:5000/pose?needScale=true&model={Enum.GetName(typeof(MLModel), model)}";
 
         Debug.Log("Using model " + Enum.GetName(typeof(MLModel), model));
+    }
+
+    public void SetIP(string ip)
+    {
+        IPAddress = ip;
+        SetModel(this.model);
     }
 
     /// <summary>
@@ -174,13 +180,5 @@ public class PoseHandler
             }
         }
         return result;
-    }
-
-    private bool Similar(float value, float center, float threshold = 0.15f)
-    {
-        float min = center - threshold;
-        float max = center + threshold;
-
-        return value > min && value < max;
     }
 }

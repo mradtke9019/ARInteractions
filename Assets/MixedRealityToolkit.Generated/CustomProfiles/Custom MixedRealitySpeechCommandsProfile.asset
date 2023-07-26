@@ -65,3 +65,17 @@ MonoBehaviour:
       id: 18
       description: Start Recording
       axisConstraint: 0
+  - localizationKey: 
+    keyword: Keyboard
+    keyCode: 0
+    action:
+      id: 21
+      description: Toggle Keyboard
+      axisConstraint: 0
+  - localizationKey: 
+    keyword: Wild
+    keyCode: 0
+    action:
+      id: 20
+      description: Toggle Wildcard
+      axisConstraint: 0

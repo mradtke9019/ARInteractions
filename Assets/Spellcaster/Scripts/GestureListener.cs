@@ -14,8 +14,9 @@ public class GestureListener : MonoBehaviour
     GestureHandler GestureHandler;
     public MLModel Model = MLModel.KNN;
     public ApplicationMode ApplicationMode = ApplicationMode.Listening;
+    public bool UseWildcard = true;
     public float WildcardFactor = 0.15f;
-
+    public string FlaskIPAddress = "192.168.0.101";
 
     PoseHandler _poseHandler;
     GestureStateMachine _stateMachine;
@@ -77,15 +78,6 @@ public class GestureListener : MonoBehaviour
         };
 
 
-/*        if (lh.Pose != Pose.None)
-        {
-            Debug.Log("Left hand pose: " + Enum.GetName(typeof(Pose), lh.Pose));
-        }
-        if (rh.Pose != Pose.None)
-        {
-            Debug.Log("Right hand pose: " + Enum.GetName(typeof(Pose), rh.Pose));
-        }*/
-
         _stateMachine.ApplyPose(rh);
         _stateMachine.ApplyPose(lh);
 
@@ -101,7 +93,7 @@ public class GestureListener : MonoBehaviour
         foreach(var hand in timelineMap.GetTrackedHands())
         {
             // Consider if one of the hands is currently part of a continuous gesture. If so, we should not consider that hand for future gestures.
-            Gesture g = GestureHandler.GetGesture(timelineMap.GetPoseTimeline(hand), WildcardFactor, hand);
+            Gesture g = GestureHandler.GetGesture(timelineMap.GetPoseTimeline(hand), UseWildcard ? WildcardFactor : 0.0f, hand);
 
 
             Gesture CurrentlyExecutedGesture = CurrentlyExecutedGestures[hand];
@@ -160,6 +152,19 @@ public class GestureListener : MonoBehaviour
     {
         this.ApplicationMode = mode;
     }
+    
+    public void ToggleWildcard()
+    {
+        Debug.Log("Toggling wildcard");
+        UseWildcard = !UseWildcard;
+    }
+
+    public void SetFlaskIPAddress(string ip)
+    {
+        Debug.Log("Flask IP set");
+        FlaskIPAddress = ip;
+        _poseHandler.SetIP(ip);
+    }
 
     public string GetDebugInfo()
     {
@@ -167,8 +172,10 @@ public class GestureListener : MonoBehaviour
         
         if(ApplicationMode == ApplicationMode.Recording)
         {
-            return "In recording mode." + Environment.NewLine + 
-                "Say 'Listen' to being gesture interactions";
+            return "In data capture mode." + Environment.NewLine + 
+                "Say 'Listen' to being gesture interactions" + Environment.NewLine + 
+                "Flask IP: " + FlaskIPAddress + Environment.NewLine +
+                "Using Wildcard: " + UseWildcard.ToString();
         }
 
         // Currently consider each hand by itself for executing gestures

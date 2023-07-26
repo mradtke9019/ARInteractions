@@ -25,8 +25,20 @@ import warnings
 warnings.warn = warn
 
 cwd = os.path.abspath(sys.path[0])
-dataset = Dataset(os.path.join(cwd, "Final.json"), Debug = True)
-datasetOptimized = Dataset(os.path.join(cwd, "OptimizedFinal.json"), Debug = True)
+datasetPath = os.path.join(cwd, "Final.json")
+datasetOptimizedPath = os.path.join(cwd, "OptimizedFinal.json")
+
+if(os.path.exists(datasetPath) == False):
+    dataPath = "./Data/"
+    MergeJsonAndLabel(dataPath, "./")
+
+if(os.path.exists(datasetOptimizedPath) == False):
+    dataPath = "./OptimizedData/"
+    MergeJsonAndLabel(dataPath, "./", "OptimizedFinal.json")
+
+dataset = Dataset(datasetPath, Debug = True)
+datasetOptimized = Dataset(datasetOptimizedPath, Debug = True)
+
 # idealK = 51
 KNNModel = MLModel()
 # KNNModel.AssignModelAndHyperParameters("KNN", K = idealK)
