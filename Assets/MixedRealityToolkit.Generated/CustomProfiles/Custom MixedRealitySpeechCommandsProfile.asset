@@ -79,3 +79,10 @@ MonoBehaviour:
       id: 20
       description: Toggle Wildcard
       axisConstraint: 0
+  - localizationKey: 
+    keyword: Release
+    keyCode: 0
+    action:
+      id: 22
+      description: Start Release Mode
+      axisConstraint: 0

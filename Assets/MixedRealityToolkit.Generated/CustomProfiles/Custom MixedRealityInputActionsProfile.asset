@@ -77,3 +77,6 @@ MonoBehaviour:
   - id: 21
     description: Toggle Keyboard
     axisConstraint: 0
+  - id: 22
+    description: Start Release Mode
+    axisConstraint: 0

@@ -1,0 +1,7 @@
+Gesture,Sequence,Wildcard Success Rate,No Wildcard Success Rate,Notes,Samples,Rates With W,Rates without W
+Lighter,"Fist, Thumbs Up",20/20,14/20,Pinch often predicted during transition,20,1,.7
+Fireball,"Fist, Palm",19/20,16/20,Peace Sign and Palm were predicted during transition,20,0.95,.8
+Webshot,"Shaka, Webslinging",20/20,20/20,Good transition of poses. No intermediate errors,20,1,1
+Lightning Strike,"Fist, Peace Sign, Fist, Point",14/20,0/20,Occlusion of fingers for peace sign incorrectly predicts a palm pose. This sequence of poses is more difficult to get correct.,20,0.7,0
+Laser Beam,"Pinch, Point, Pinch, Point",15/20,11/20,Pinch and point mixed up during transitions,20,0.75,.55
+Finger Gun,"Thumbs Down, Fist, Point",20/20,3/20,Pinch mixed during fist to point transition,20,1,.15

@@ -2,20 +2,15 @@ using Microsoft.MixedReality.Toolkit;
 using Microsoft.MixedReality.Toolkit.Input;
 using Microsoft.MixedReality.Toolkit.Utilities;
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using UnityEngine;
-using UnityEngine.Networking;
-using UnityEngine.Serialization;
-using UnityEngine.XR;
 
 public class PoseHandler 
 {
-    private const float GRAB_THRESHOLD = 0.3f;
-    private const bool DEBUG = false;
     private IMixedRealityHandJointService handJointService;
     private MLModel model;
     string address = null;
@@ -35,7 +30,7 @@ public class PoseHandler
         address = Application.isEditor ? localAddress : IPAddress;
         url = $"http://{address}:5000/pose?needScale=true&model={Enum.GetName(typeof(MLModel), model)}";
 
-        Debug.Log("Using model " + Enum.GetName(typeof(MLModel), model));
+        UnityEngine.Debug.Log("Using model " + Enum.GetName(typeof(MLModel), model));
     }
 
     public void SetIP(string ip)
@@ -113,6 +108,8 @@ public class PoseHandler
 
         List<Pose> result = null;
 
+        Stopwatch watch = Stopwatch.StartNew();
+
         using (HttpClient httpClient = new HttpClient())
         {
             StringContent content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
@@ -130,7 +127,7 @@ public class PoseHandler
                 }
                 catch (Exception e)
                 {
-                    Debug.Log(e.Message);
+                    UnityEngine.Debug.Log(e.Message);
                 }
             }
             else
@@ -139,6 +136,8 @@ public class PoseHandler
                 Console.WriteLine("Error: " + responseContent);
             }
         }
+        watch.Stop();
+        UnityEngine.Debug.Log("Pose prediction 2 took: " + watch.Elapsed);
         return result;
     }
 
@@ -152,11 +151,12 @@ public class PoseHandler
         // Convert the object to JSON
         string jsonBody = handData.ToFlaskParameter();
         Pose result = Pose.None;
+        Stopwatch watch = Stopwatch.StartNew();
 
         using (HttpClient httpClient = new HttpClient())
         {
             StringContent content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
-
+            
             HttpResponseMessage response = httpClient.PostAsync(url, content).Result;
 
             string responseContent = response.Content.ReadAsStringAsync().Result;
@@ -170,7 +170,7 @@ public class PoseHandler
                 }
                 catch (Exception e)
                 {
-                    Debug.Log(e.Message);
+                    UnityEngine.Debug.Log(e.Message);
                 }
             }
             else
@@ -179,6 +179,9 @@ public class PoseHandler
                 Console.WriteLine("Error: " + responseContent);
             }
         }
+        watch.Stop();
+        UnityEngine.Debug.Log("Pose prediction took: " + watch.Elapsed);
+
         return result;
     }
 }

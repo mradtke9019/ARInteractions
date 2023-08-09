@@ -39,15 +39,18 @@ if(os.path.exists(datasetOptimizedPath) == False):
 dataset = Dataset(datasetPath, Debug = True)
 datasetOptimized = Dataset(datasetOptimizedPath, Debug = True)
 
-# idealK = 51
-KNNModel = MLModel()
-# KNNModel.AssignModelAndHyperParameters("KNN", K = idealK)
-# KNNModel.TrainModel(dataset, True)
-KNNModel.LoadModel(os.path.join(cwd, "ModelKNN.joblib"), "KNN" , dataset, True)
+oldKNN = MLModel()
+oldKNN.LoadModel(os.path.join(cwd, "OLDKNNModelKNN.joblib"), "KNN" , dataset, True)
 
-# idealC = 10
-SVCModelOriginal = MLModel()
-SVCModelOriginal.LoadModel(os.path.join(cwd, "ModelSVC.joblib"), "SVC", dataset, True)
+oldSVC = MLModel()
+oldSVC.LoadModel(os.path.join(cwd, "OLDKNNModelKNN.joblib"), "SVC" , dataset, True)
+
+oldLinearSVC = MLModel()
+oldLinearSVC.LoadModel(os.path.join(cwd, "OldLinearSVCModelModelLinearSVCL2.joblib"), "LinearSVCL2" , dataset, True)
+
+
+KNNModel = MLModel()
+KNNModel.LoadModel(os.path.join(cwd, "NewKNNModelKNN.joblib"), "KNN" , datasetOptimized, True)
 
 
 SVCModelOptimized = MLModel()
@@ -66,10 +69,14 @@ class Pose(Resource):
         parser = reqparse.RequestParser()  # initialize
         parser.add_argument('needScale', required=True)  # add args
         parser.add_argument('model', required=True)  # add args
+        parser.add_argument('old', required=False)  # add args
         args = parser.parse_args()  # parse arguments to dictionary
         needScale = args["needScale"]
         m = args["model"]
-
+        useOldModel = False
+        if "old" in args:
+            useOldModel = args["old"]
+            # print("Using old model")
 
         featureCount = -1
         x = None
@@ -93,11 +100,17 @@ class Pose(Resource):
         
         # print("Feature Count", featureCount)
         if m == "KNN":
-            chosenModel = KNNModel
+            if useOldModel:
+                chosenModel = oldKNN
+            else:
+                chosenModel = KNNModel
         elif m == "SVC" and featureCount == 396:
             chosenModel = SVCModelOptimized
-        elif m == "SVC" and featureCount == 573:
-            chosenModel = SVCModelOriginal
+        elif m == "SVC" and featureCount == 573 and useOldModel:
+            chosenModel = oldSVC
+        elif m == "LinearSVCL2" and useOldModel:
+            print("using Old Linear SVC")
+            chosenModel = oldLinearSVC
         elif m == "LinearSVCL2" and featureCount == 396:
             chosenModel = LinearSVCModel
             

@@ -22,7 +22,7 @@ public class GestureHandler
     /// </summary>
     /// <param name="timeline">The timeline of the poses executed stored in recent order. The most recent elements will be in the beginning with the last events happening at the end of the list.</param>
     /// <returns></returns>
-    public Gesture GetGesture(PoseTimeline timeline, float WildcardFactor, Handedness hand = Handedness.Any)
+    public Gesture GetGesture(PoseTimeline timeline, float WildcardFactor)
     {
         if (timeline == null)
         {
@@ -56,7 +56,7 @@ public class GestureHandler
                     continue;
                 }
                 // We found our pose on the correct hand, so count how long it was held for and check if the requirement was met.
-                else if (timeDurationEvent.Pose == requirement.Pose && (hand != Handedness.Any && requirement.Hand == hand))
+                else if (timeDurationEvent.Pose == requirement.Pose)
                 {
                     currRequirementTime += timeDurationEvent.Duration;
                     if(currRequirementTime >= requirement.Duration)
@@ -67,18 +67,19 @@ public class GestureHandler
                         currRequirementTime = 0.0f;
                     }
                 }
-                else if (timeDurationEvent.Duration <= WildcardFactor)
+                else if (timeDurationEvent.Pose != Pose.None  && timeDurationEvent.Pose != requirement.Pose && timeDurationEvent.Duration <= WildcardFactor)
                 {
                     // If our current pose found is not a match, still potentially wait for a time to see if we accidentally predicted a wrong intermediate pose
                     continue;
                 }
-                else if(timeDurationEvent.Pose != requirement.Pose && requirement.Pose != Pose.None && (hand == Handedness.Any && requirement.Hand != hand))
+                else if(requirement.Pose != Pose.None && timeDurationEvent.Pose != requirement.Pose)
                 {
                     // Our current data is a mismatch, so need to restart search since our data was interrupted by a pose not part of the current gesture.
                     currRequirement = totalRequirements;
                     requirementSatisfied = Enumerable.Repeat(false, requirements.Count).ToList();
                     previousPose = Pose.None;
                     currRequirementTime = 0.0f;
+                    break;
                 }
 
                 // If the current timeline satisfies the requirements of the current gesture, return it.
@@ -92,12 +93,12 @@ public class GestureHandler
     }
     
 
-    public Dictionary<string,List<string>> GetGestureCombos()
+    public Dictionary<string,List<Pose>> GetGestureCombos()
     {
-        Dictionary<string, List<string>> result = new Dictionary<string, List<string>>();
+        Dictionary<string, List<Pose>> result = new Dictionary<string, List<Pose>>();
         foreach (var gesture in Gestures)
         {
-            result.Add(gesture.name,gesture.Requirements.PoseRequirements.Select(x => Enum.GetName(typeof(Pose), x.Pose)).ToList());
+            result.Add(gesture.name,gesture.Requirements.PoseRequirements.Select(x => x.Pose).ToList());
         }
 
         return result;

@@ -4,5 +4,6 @@ using System;
 public enum ApplicationMode
 {
     Listening,
-    Recording
+    Recording,
+    Release
 }

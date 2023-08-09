@@ -7,6 +7,9 @@ using System;
 using Unity.VisualScripting;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Drawing;
+using System.Net.NetworkInformation;
+using System.Security.Cryptography;
 
 public class GestureListener : MonoBehaviour
 {
@@ -28,7 +31,7 @@ public class GestureListener : MonoBehaviour
     Handedness _leftHand;
     private IMixedRealityHandJointService handJointService;
 
-    private Dictionary<string, List<string>> gestureNameCombos;
+    private Dictionary<string, List<Pose>> gestureNameCombos;
 
 
     // Start is called before the first frame update
@@ -50,7 +53,7 @@ public class GestureListener : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(ApplicationMode != ApplicationMode.Listening)
+        if(ApplicationMode != ApplicationMode.Listening && ApplicationMode != ApplicationMode.Release)
         {
             return;
         }
@@ -93,7 +96,7 @@ public class GestureListener : MonoBehaviour
         foreach(var hand in timelineMap.GetTrackedHands())
         {
             // Consider if one of the hands is currently part of a continuous gesture. If so, we should not consider that hand for future gestures.
-            Gesture g = GestureHandler.GetGesture(timelineMap.GetPoseTimeline(hand), UseWildcard ? WildcardFactor : 0.0f, hand);
+            Gesture g = GestureHandler.GetGesture(timelineMap.GetPoseTimeline(hand), UseWildcard ? WildcardFactor : 0.0f);
 
 
             Gesture CurrentlyExecutedGesture = CurrentlyExecutedGestures[hand];
@@ -122,7 +125,7 @@ public class GestureListener : MonoBehaviour
                 {
                     CurrentlyExecutedGestures[g.FinalPoseHand()] = g;
                 }
-                else if (g.Continuity.type == ContinuityType.Finite && !g.GestureCallback.GestureOnEnd.IsUnityNull() && !g.GestureCallback.GestureOnEnd.IsNull() && g.Continuity.Duration > 0)
+                else if (g.Continuity.type == ContinuityType.NonContinuous && !g.GestureCallback.GestureOnEnd.IsUnityNull() && !g.GestureCallback.GestureOnEnd.IsNull() && g.Continuity.Duration > 0)
                 {
                     // Wait the specified amount of time to execute the on end functions
                     Action a = () =>
@@ -152,6 +155,7 @@ public class GestureListener : MonoBehaviour
     {
         this.ApplicationMode = mode;
     }
+
     
     public void ToggleWildcard()
     {
@@ -166,6 +170,34 @@ public class GestureListener : MonoBehaviour
         _poseHandler.SetIP(ip);
     }
 
+    public static string ShortPoseName(Pose p)
+    {
+        switch (p)
+        {
+            case Pose.Fist:
+                return "Fst";
+            case Pose.Pinch:
+                return "Pnch";
+            case Pose.ThumbsUp:
+                return "ThU";
+            case Pose.ThumbsDown:
+                return "ThD";
+            case Pose.Point:
+                return "Pnt";
+            case Pose.Shaka:
+                return "Shk";
+            case Pose.Palm:
+                return "Plm";
+            case Pose.WebSlinging:
+                return "Web";
+            case Pose.PeaceSign:
+                return "Peace";
+            case Pose.None:
+                return "None";
+        }
+        return "ERROR";
+    }
+
     public string GetDebugInfo()
     {
         string val = "";
@@ -176,6 +208,10 @@ public class GestureListener : MonoBehaviour
                 "Say 'Listen' to being gesture interactions" + Environment.NewLine + 
                 "Flask IP: " + FlaskIPAddress + Environment.NewLine +
                 "Using Wildcard: " + UseWildcard.ToString();
+        }
+        if(ApplicationMode == ApplicationMode.Release)
+        {
+            return "";
         }
 
         // Currently consider each hand by itself for executing gestures
@@ -190,10 +226,18 @@ public class GestureListener : MonoBehaviour
             val += name;
         }
 
-        val += "Combos:" + Environment.NewLine;
+        //val += "Combos:" + Environment.NewLine;
         foreach (var key in gestureNameCombos.Keys)
         {
-            val += key + ": " + string.Join(", " , gestureNameCombos[key].Select(x => x)) + Environment.NewLine;
+            if(gestureNameCombos[key].Count >= 4)
+            {
+                val += key + ": " + string.Join(", ", gestureNameCombos[key].Select(x => ShortPoseName(x)));
+            }
+            else
+            {
+                val += key + ": " + string.Join(", ", gestureNameCombos[key].Select(x => Enum.GetName(typeof(Pose), x)));
+            }
+            val += Environment.NewLine;
         }
 
         return val;

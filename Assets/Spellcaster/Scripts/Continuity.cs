@@ -7,7 +7,7 @@ using UnityEngine;
 public enum ContinuityType
 {
     Continuous,
-    Finite
+    NonContinuous
 }
 
 [Serializable]
