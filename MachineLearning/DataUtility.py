@@ -182,27 +182,6 @@ class Dataset:
         
         self.trainY = self.y.iloc[:numRowsTrain]
         self.validateY = self.y.iloc[numRowsTrain:]
-        
-        self.xPolys = {}
-        self.xPolysScaled = {}
-        self.trainxPolys= {}
-        self.trainxPolysScaled = {}
-        self.validatexPolys = {}
-        self.validatexPolysScaled = {}
-        self.polynomialFeatureNames = {}
-    def AddPolynomialFeatures(self, degree):
-        pf = PolynomialFeatures(degree)
-        self.xPolys[degree] = pf.fit_transform(self.X)
-        self.xPolysScaled[degree] = pf.fit_transform(self.XScaled)
-        self.trainxPolys[degree] = pf.fit_transform(self.trainX)
-        self.trainxPolysScaled[degree] = pf.fit_transform(self.trainXScaled)
-        self.validatexPolys[degree] = pf.fit_transform(self.validateX)
-        self.validatexPolysScaled[degree] = pf.fit_transform(self.validateXScaled)
-        
-        self.polynomialFeatureNames[degree] = pf.get_feature_names_out(self.ColumnNames)
-    def PrintColumns(self):
-        for name in self.ColumnNames:
-            print(name)
 
 class MLModel:
     def __init__(self):
