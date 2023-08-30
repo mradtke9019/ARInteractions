@@ -1,0 +1,4 @@
+# ARInteractions
+
+## Abstract
+The goal of this work is to understand the current state of interactions in augmented reality (AR), and propose an alternate approach to interaction in AR by utilizing modern software and hardware. The work presented seeks to answer the following questions: Can we predict the pose of the user's hand using the data gathered by the HoloLens 2, create unique combinations of those poses to be executed by the user as an alternate way to interact with the AR environment, and can we ensure that such gestures are usable. The work evaluates the proposed methodology by performing different experiments measuring the prediction accuracy of poses, overall success rate of gesture execution, and real time performance. The work concludes that this proposed methodology of driving gestural interaction from pose recognition is feasible.
